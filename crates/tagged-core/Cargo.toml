@@ -1,5 +1,5 @@
 [package]
-name = "rust-tagged"
+name = "tagged-core"
 version = "0.1.0"
 edition = "2024"
 description = "A lightweight tagged type abstraction for type-safe IDs, etc."
