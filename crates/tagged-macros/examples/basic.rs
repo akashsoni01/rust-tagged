@@ -1,7 +1,11 @@
-use rust_tagged::Tagged;
+use tagged_core::*;
+use tagged_macros::Tagged;
+
+#[derive(Tagged)]
+struct EmployeeId(i32);
 
 struct Employee {
-    id: Tagged<i32, Self>,
+    id: EmployeeId,
     employee_email_id: Tagged<String, Self>,
     name: String,
     org: Org,

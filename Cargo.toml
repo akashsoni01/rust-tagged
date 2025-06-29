@@ -1,5 +1,5 @@
 [workspace.package]
-name = "rust-tagged"
+# name = "rust-tagged"
 version = "0.1.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]

@@ -1,4 +1,4 @@
-use tagged_core::{Tagged};
+use rust_tagged::{Tagged};
 
 struct UserIdTag;
 fn main() {

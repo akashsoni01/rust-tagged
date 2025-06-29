@@ -2,6 +2,10 @@
 name = "tagged-macros"
 version = "0.1.0"
 edition = "2024"
+description = "Proc macros for rust-tagged crate"
+license = "Mozilla-2.0"
+readme = "../../README.md"
+include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 
 [lib]
 proc-macro = true
@@ -10,3 +14,4 @@ proc-macro = true
 proc-macro2 = "1"
 syn = { version = "2", features = ["full"] }
 quote = "1"
+#tagged-core = { version = "0.1.0", path = "../tagged-core" }
