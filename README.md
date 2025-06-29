@@ -115,11 +115,12 @@ fn main() {
     // 
     // // expected `&Tagged<String, Employee>`, but found `&Tagged<String, Org>`
     // send_mail_employee(&emp.org.org_email_id, "This is supposed to send to user but there is no type safety at compile time");
-    // 
+    //
+    // // after refactoring
     // // the trait bound `Tagged<String, Employee>: From<Tagged<String, Org>>` is not satisfied [E0277]
     // send_mail_employee(&emp.org.org_email_id.into(), "This is ok");
 
-    // after refactoring
+    // We don't need review and refactoring the code for runtime mistakes.
     send_mail_org(&emp.org.org_email_id, "This is ok");
     send_mail_employee(&emp.employee_email_id, "This is ok");
 
