@@ -1,6 +1,7 @@
 use tagged_core::Tagged;
 
 struct Employee {
+    id: Tagged<i32, Self>,
     employee_email_id: Tagged<String, Self>,
     name: String,
     org: Org,
@@ -26,6 +27,7 @@ fn send_mail(mail_id: &str, message: &str) {
 
 fn main() {
     let emp = Employee {
+        id: 12.into(),
         employee_email_id: "akash@gmail.com".into(),
         name: "Akash".into(),
         org: Org {
@@ -35,12 +37,15 @@ fn main() {
     };
 
     // here we can clearly define and distinct the mail id of employee and org
-    // without 
-    // // expected `&Tagged<String, Org>`, but found `&Tagged<String, Employee>` 
+    // without
+    // // expected `&Tagged<String, Org>`, but found `&Tagged<String, Employee>`
     // send_mail_org(&emp.employee_email_id, "This is supposed to send to user but there is no type safety at compile time");
-    // 
-    // // expected `&Tagged<String, Employee>`, but found `&Tagged<String, Org>` 
+    //
+    // // expected `&Tagged<String, Employee>`, but found `&Tagged<String, Org>`
     // send_mail_employee(&emp.org.org_email_id, "This is supposed to send to user but there is no type safety at compile time");
+
+    // // the trait bound `Tagged<String, Employee>: From<Tagged<String, Org>>` is not satisfied [E0277]
+    // send_mail_employee(&emp.org.org_email_id.into(), "This is ok");
 
     // after refactoring
     send_mail_org(&emp.org.org_email_id, "This is ok");

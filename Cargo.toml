@@ -8,6 +8,8 @@ license = "Mozilla-2.0"
 
 [workspace]
 resolver = "3" # or "3"
-members = [ "crates/tagged-chrono",
+members = [
+    "crates/tagged-chrono",
     "crates/tagged-core",
+    "crates/tagged-macros",
 ]
