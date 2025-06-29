@@ -15,3 +15,22 @@ impl<T, U> Tagged<T, U> {
         &self.value
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test() {
+        struct SomeStruct{
+            id: Tagged<i32, SomeStruct>
+        }
+        let tagged_struct = SomeStruct{
+            id: Tagged::new(0)
+        };
+
+        // tagged_strut.id = 3; // 
+        
+        assert_eq!(tagged_struct.id.value, 0);
+    }
+}
