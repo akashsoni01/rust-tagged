@@ -10,7 +10,7 @@ homepage = "https://github.com/akashsoni01/rust-tagged"
 documentation = "https://docs.rs/rust-tagged"
 keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
 categories = ["data-structures"]
-readme = "../../README.md"
+readme = "../README.md"
 include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 
 [dependencies]
