@@ -1,14 +1,19 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+pub trait Tag {}
+
+pub struct Tagged<T, U: Tag> {
+    value: T,
+    _marker: std::marker::PhantomData<U>,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+impl<T, U: Tag> Tagged<T, U> {
+    pub fn new(value: T) -> Self {
+        Self {
+            value,
+            _marker: std::marker::PhantomData,
+        }
+    }
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    pub fn value(&self) -> &T {
+        &self.value
     }
 }

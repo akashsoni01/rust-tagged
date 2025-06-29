@@ -1,8 +1,6 @@
 [package]
-name.workspace = true
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
+name = "tagged-chrono"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]

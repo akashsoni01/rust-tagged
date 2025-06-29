@@ -14,3 +14,6 @@ Library Design Proposal
 - ✅ Implements `Clone`, `Copy`, `Eq`, `PartialEq`, `Ord`, `Hash`, `Debug`, `Display`
 - ✅ `From<i32>`, `From<&str>` for ergonomic usage
 - ✅ Works seamlessly with `serde_json` and `typealias` style
+
+
+cargo run -p tagged-core --example basic

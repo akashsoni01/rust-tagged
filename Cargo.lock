@@ -3,5 +3,9 @@
 version = 4
 
 [[package]]
-name = "rust-tagged"
+name = "tagged-chrono"
+version = "0.1.0"
+
+[[package]]
+name = "tagged-core"
 version = "0.1.0"
