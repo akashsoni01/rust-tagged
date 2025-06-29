@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
 license = "Mozilla Public License 2.0"
+description = "A lightweight tagged type abstraction for type-safe IDs, etc."
+repository = "https://github.com/codefonsi/rust-tagged"
+homepage = "https://github.com/codefonsi/rust-tagged"
+documentation = "https://docs.rs/rust-tagged"
+keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
+categories = ["data-structures"]
+readme = "./README.md"
+include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 
 
 [workspace]
