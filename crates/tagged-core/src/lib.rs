@@ -48,25 +48,25 @@ impl<T, U> Deref for Tagged<T, U> {
 }
 
 // For all common primitive types
-macro_rules! impl_from_tagged {
-    ($($t:ty),*) => {
-        $(
-            impl<U> From<Tagged<$t, U>> for $t {
-                fn from(tagged: Tagged<$t, U>) -> Self {
-                    tagged.value
-                }
-            }
-        )*
-    };
-}
-
-impl_from_tagged!(
-    u8, u16, u32, u64, u128,
-    i8, i16, i32, i64, i128,
-    f32, f64,
-    usize, isize,
-    bool, char
-);
+// macro_rules! impl_from_tagged {
+//     ($($t:ty),*) => {
+//         $(
+//             impl<U> From<Tagged<$t, U>> for $t {
+//                 fn from(tagged: Tagged<$t, U>) -> Self {
+//                     tagged.value
+//                 }
+//             }
+//         )*
+//     };
+// }
+// 
+// impl_from_tagged!(
+//     u8, u16, u32, u64, u128,
+//     i8, i16, i32, i64, i128,
+//     f32, f64,
+//     usize, isize,
+//     bool, char
+// );
 
 
 #[cfg(test)]

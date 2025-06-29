@@ -40,10 +40,10 @@ fn main() {
     // without
     // // expected `&Tagged<String, Org>`, but found `&Tagged<String, Employee>`
     // send_mail_org(&emp.employee_email_id, "This is supposed to send to user but there is no type safety at compile time");
-    //
+    // 
     // // expected `&Tagged<String, Employee>`, but found `&Tagged<String, Org>`
     // send_mail_employee(&emp.org.org_email_id, "This is supposed to send to user but there is no type safety at compile time");
-
+    // 
     // // the trait bound `Tagged<String, Employee>: From<Tagged<String, Org>>` is not satisfied [E0277]
     // send_mail_employee(&emp.org.org_email_id.into(), "This is ok");
 
