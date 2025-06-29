@@ -11,6 +11,14 @@
 * Ergonomic `.into()` support for primitive conversions
 * Optional serde and macro support for clean `#[derive(Tagged)]`
 
+### 📚 Conceptual References
+
+* [Phantom types (Rust Nomicon)](https://doc.rust-lang.org/nomicon/phantom-data.html)
+* [Tagged unions (Wikipedia)](https://en.wikipedia.org/wiki/Tagged_union)
+* [Phantom types in Haskell](https://wiki.haskell.org/Phantom_type)
+* [Newtype pattern in Rust](https://doc.rust-lang.org/rust-by-example/generics/new_types.html)
+* [Algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type)
+
 ---
 
 ## ✨ Features
@@ -173,12 +181,8 @@ let json = serde_json::to_string(&id)?; // "10"
 
 ---
 
----
-
 ## 📃 License
 
 Licensed under either of
 
 * Mozilla Public License 2.0
-
-cargo run -p tagged-core --example basic
