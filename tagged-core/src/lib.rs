@@ -1,4 +1,29 @@
 use std::ops::Deref;
+/// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
+/// 
+/// Eliminate accidental mixups between similar types (e.g. OrgId vs UserId)
+/// Enforce domain modeling in code via the type system
+/// Ergonomic .into() support for primitive conversions
+/// 
+/// # Example
+/// 
+/// ```
+/// use rust_tagged::{Tagged};
+/// 
+/// #[derive(Debug)]
+/// struct EmailTag;
+/// 
+/// type Email = Tagged<String, EmailTag>;
+/// 
+/// fn main() {
+///     let email: Email = "test@example.com".into();
+///     println!("Email inner value: {}", email.value());
+/// 
+///     // Convert back to String
+///     let raw: String = email.into();
+///     println!("Raw String: {raw}");
+/// }
+/// ```
 pub struct Tagged<T, U> {
     value: T,
     _marker: std::marker::PhantomData<U>,

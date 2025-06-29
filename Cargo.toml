@@ -1,15 +1,55 @@
-[workspace.package]
-# name = "rust-tagged"
+[package]
+name = "rust-tagged"
 version = "0.1.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
-license = "Mozilla Public License 2.0"
+license = "MPL-2.0"
+description = "A lightweight tagged type abstraction for type-safe IDs, etc."
+repository = "https://github.com/codefonsi/rust-tagged"
+homepage = "https://github.com/codefonsi/rust-tagged"
+documentation = "https://docs.rs/rust-tagged"
+keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
+categories = ["data-structures"]
+readme = "./README.md"
+include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 
 
 [workspace]
 resolver = "3" # or "3"
 members = [
-    "crates/tagged-chrono",
-    "crates/tagged-core",
-    "crates/tagged-macros",
+    "tagged-chrono",
+    "tagged-core",
+    "tagged-macros",
 ]
+
+#[lib]
+#path = "crates/tagged-core/src/lib.rs"
+
+#[workspace.dependencies]
+#tagged-core = {path = "crates/tagged-core"}
+#
+
+[patch.crates-io]
+tagged-core = { path = "tagged-core" }
+
+[dependencies]
+tagged-core = { version = "0.1.0" } # This will use the patched version from local
+
+[workspace.dependencies]
+#tagged-core = { path = "crates/tagged-core", version = "0.1.0" }
+#serde = { version = "1.0", optional = true, features = ["derive"] }
+#uuid = { version = "1.4", optional = true }
+#chrono = { version = "0.4", optional = true }
+
+#[dependencies]
+#tagged-core.workspace = true
+#serde = { version = "1.0", features = ["derive"] }
+#uuid = { version = "1.4" }
+#chrono = { version = "0.4" }
+
+# crates/tagged-core/Cargo.toml
+[features]
+default = []
+#serde = ["dep:serde"]
+#uuid = ["dep:uuid"]
+#chrono = ["dep:chrono"]

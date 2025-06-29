@@ -1,4 +1,4 @@
-use rust_tagged::Tagged;
+use tagged_core::Tagged;
 
 struct Employee {
     id: Tagged<i32, Self>,
