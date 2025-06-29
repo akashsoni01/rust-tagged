@@ -3,7 +3,7 @@
 version = "0.1.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
-license = "Mozilla-2.0"
+license = "Mozilla Public License 2.0"
 
 
 [workspace]
