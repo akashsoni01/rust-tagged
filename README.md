@@ -137,6 +137,7 @@ Email: user@example.com
 
 ---
 
+## Coming Soon 
 ## 🧱 Medium: Nesting in Domain Models
 
 ```rust
@@ -169,7 +170,8 @@ fn main() {
 
 ---
 
-## 🔒 Hard: Timestamped Resources with `chrono` + `serde`
+## Coming Soon 
+## Timestamped Resources with `chrono` + `serde`
 
 ```rust
 use rust_tagged::*;
@@ -207,6 +209,7 @@ fn main() {
 
 ---
 
+## Coming Soon 
 ## 🔌 Serde Integration
 
 When enabled via `features = ["serde"]`, tagged types auto-serialize like their inner types.
