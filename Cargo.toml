@@ -1,6 +1,14 @@
-[package]
+[workspace.package]
 name = "rust-tagged"
 version = "0.1.0"
 edition = "2024"
+authors = ["Codefonsi <info@codefonsi.com>"]
+license = "Mozilla-2.0"
+
+
+[workspace]
+members = [ "crates/tagged-chrono",
+    "crates/tagged-core",
+]
 
 [dependencies]
