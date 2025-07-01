@@ -140,6 +140,24 @@ impl<'de, T: Deserialize<'de>, Tag> Deserialize<'de> for Tagged<T, Tag> {
     }
 }
 
+impl<T, Tag> IntoIterator for Tagged<Vec<T>, Tag> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.value.into_iter()
+    }
+}
+
+impl<'a, T, Tag> IntoIterator for &'a Tagged<Vec<T>, Tag> {
+    type Item = &'a T;
+    type IntoIter = std::slice::Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.value.iter()
+    }
+}
+
 // For all common primitive types
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {
