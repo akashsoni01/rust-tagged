@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::fmt;
 use std::ops::Deref;
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
@@ -89,6 +90,18 @@ impl<T: PartialOrd, Tag> PartialOrd for Tagged<T, Tag> {
 impl<T: Ord, Tag> Ord for Tagged<T, Tag> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.value.cmp(&other.value)
+    }
+}
+
+impl<T: fmt::Debug, Tag> fmt::Debug for Tagged<T, Tag> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.value.fmt(f)
+    }
+}
+
+impl<T: fmt::Display, Tag> fmt::Display for Tagged<T, Tag> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.value.fmt(f)
     }
 }
 
