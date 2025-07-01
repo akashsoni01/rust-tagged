@@ -158,6 +158,19 @@ impl<'a, T, Tag> IntoIterator for &'a Tagged<Vec<T>, Tag> {
     }
 }
 
+
+impl<T, Tag> Tagged<T, Tag> {
+    /// Not allowed feature - Get a mutable reference to the internal value
+    // pub fn value_mut(&mut self) -> &mut T {
+    //     &mut self.value
+    // }
+
+    /// Replace the inner value
+    pub fn set(&mut self, new_value: T) {
+        self.value = new_value;
+    }
+}
+
 // For all common primitive types
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {
