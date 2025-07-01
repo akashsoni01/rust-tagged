@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::ops::Deref;
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
@@ -8,7 +9,7 @@ use std::ops::Deref;
 /// # Example
 /// 
 /// ```
-/// use rust_tagged::{Tagged};
+/// use tagged_core::{Tagged};
 /// 
 /// #[derive(Debug)]
 /// struct EmailTag;
@@ -24,12 +25,12 @@ use std::ops::Deref;
 ///     println!("Raw String: {raw}");
 /// }
 /// ```
-pub struct Tagged<T, U> {
+pub struct Tagged<T, Tag> {
     value: T,
-    _marker: std::marker::PhantomData<U>,
+    _marker: std::marker::PhantomData<Tag>,
 }
 
-impl<T, U> Tagged<T, U> {
+impl<T, Tag> Tagged<T, Tag> {
     pub fn new(value: T) -> Self {
         Self {
             value,
@@ -43,32 +44,51 @@ impl<T, U> Tagged<T, U> {
 }
 
 
-/// Blanket `From<T>` for `Tagged<T, U>`
-impl<T, U> From<T> for Tagged<T, U> {
+/// Blanket `From<T>` for `Tagged<T, Tag>`
+impl<T, Tag> From<T> for Tagged<T, Tag> {
     fn from(value: T) -> Self {
         Tagged::new(value)
     }
 }
 
-/// Support `From<&str>` → `Tagged<String, U>`
-impl<U> From<&str> for Tagged<String, U> {
+/// Support `From<&str>` → `Tagged<String, Tag>`
+impl<Tag> From<&str> for Tagged<String, Tag> {
     fn from(s: &str) -> Self {
         Tagged::new(s.to_string())
     }
 }
 
-/// Support `From<&String>` → `Tagged<String, U>`
-impl<U> From<&String> for Tagged<String, U> {
+/// Support `From<&String>` → `Tagged<String, Tag>`
+impl<Tag> From<&String> for Tagged<String, Tag> {
     fn from(s: &String) -> Self {
         Tagged::new(s.clone())
     }
 }
 
-impl<T, U> Deref for Tagged<T, U> {
+impl<T, Tag> Deref for Tagged<T, Tag> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
         &self.value
+    }
+}
+impl<T: PartialEq, Tag> PartialEq for Tagged<T, Tag> {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl<T: Eq, Tag> Eq for Tagged<T, Tag> {}
+
+impl<T: PartialOrd, Tag> PartialOrd for Tagged<T, Tag> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
+
+impl<T: Ord, Tag> Ord for Tagged<T, Tag> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.value.cmp(&other.value)
     }
 }
 
@@ -76,8 +96,8 @@ impl<T, U> Deref for Tagged<T, U> {
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {
 //         $(
-//             impl<U> From<Tagged<$t, U>> for $t {
-//                 fn from(tagged: Tagged<$t, U>) -> Self {
+//             impl<Tag> From<Tagged<$t, Tag>> for $t {
+//                 fn from(tagged: Tagged<$t, Tag>) -> Self {
 //                     tagged.value
 //                 }
 //             }
@@ -112,3 +132,4 @@ mod tests {
         assert_eq!(tagged_struct.id.value, 0);
     }
 }
+
