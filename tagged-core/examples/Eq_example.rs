@@ -1,5 +1,5 @@
 use tagged_core::Tagged;
-
+fn main() {}
 #[test]
 fn test_eq() {
     let a = Tagged::<u32, String>::new(42);
