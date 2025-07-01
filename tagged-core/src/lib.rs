@@ -1,6 +1,8 @@
 use std::cmp::Ordering;
 use std::fmt;
 use std::ops::Deref;
+use std::hash::{Hash, Hasher};
+
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
 /// Eliminate accidental mixups between similar types (e.g. OrgId vs UserId)
@@ -102,6 +104,21 @@ impl<T: fmt::Debug, Tag> fmt::Debug for Tagged<T, Tag> {
 impl<T: fmt::Display, Tag> fmt::Display for Tagged<T, Tag> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.value.fmt(f)
+    }
+}
+
+impl<T: Clone, Tag> Clone for Tagged<T, Tag> {
+    fn clone(&self) -> Self {
+        Self {
+            value: self.value.clone(),
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<T: Hash, Tag> Hash for Tagged<T, Tag> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.value.hash(state)
     }
 }
 
