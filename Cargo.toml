@@ -33,7 +33,10 @@ members = [
 tagged-core = { path = "tagged-core" }
 
 [dependencies]
-tagged-core = { version = "0.1.0" } # This will use the patched version from local
+tagged-core = { path = "tagged-core", version = "0.1.0", features = ["serde"] }
+serde = { version = "1.0.219", features = ["derive"] }
+#serde = { version = "1.0", features = ["derive"], optional = true}
+serde_json = "1.0.140"
 
 [workspace.dependencies]
 #tagged-core = { path = "crates/tagged-core", version = "0.1.0" }
@@ -50,6 +53,9 @@ tagged-core = { version = "0.1.0" } # This will use the patched version from loc
 # crates/tagged-core/Cargo.toml
 [features]
 default = []
+serde = ["tagged-core/serde"]
+full = ["serde"]
+#serde = ["dep:serde"]
 #serde = ["dep:serde"]
 #uuid = ["dep:uuid"]
 #chrono = ["dep:chrono"]

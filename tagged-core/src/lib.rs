@@ -122,6 +122,24 @@ impl<T: Hash, Tag> Hash for Tagged<T, Tag> {
     }
 }
 
+
+#[cfg(feature = "serde")]
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
+
+#[cfg(feature = "serde")]
+impl<T: Serialize, Tag> Serialize for Tagged<T, Tag> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        self.value().serialize(serializer)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de, T: Deserialize<'de>, Tag> Deserialize<'de> for Tagged<T, Tag> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        T::deserialize(deserializer).map(Self::new)
+    }
+}
+
 // For all common primitive types
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {
