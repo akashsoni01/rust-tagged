@@ -17,7 +17,6 @@ include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 [workspace]
 resolver = "3" # or "3"
 members = [
-    "tagged-chrono",
     "tagged-core",
     "tagged-macros",
 ]
@@ -27,7 +26,11 @@ tagged-core = { path = "tagged-core" }
 
 [dependencies]
 tagged-core = { path = "tagged-core", version = "0.2.0", features = ["serde"] }
+
+[dev-dependencies]
 serde = { version = "1.0.219", features = ["derive"] }
+serde_json = {version = "1.0.140"}
+
 
 [workspace.dependencies]
 

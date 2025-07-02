@@ -23,6 +23,4 @@ Name: Alice
 Name: Bob
 Owned: Alice
 Owned: Bob
-
-Process finished with exit code 0
 */
