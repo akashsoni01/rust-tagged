@@ -1,6 +1,6 @@
 [package]
 name = "rust-tagged"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
 license = "MPL-2.0"
@@ -25,10 +25,12 @@ members = [
 tagged-core = { path = "tagged-core" }
 
 [dependencies]
-tagged-core = { path = "tagged-core", version = "0.2.0", features = ["serde"] }
+tagged-core = { path = "tagged-core", version = "0.3.0", features = ["serde"] }
 
 [dev-dependencies]
 serde = { version = "1.0.219", features = ["derive"] }
+
+[[example]]
 serde_json = {version = "1.0.140"}
 
 
