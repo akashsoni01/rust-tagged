@@ -171,6 +171,7 @@ impl<T, Tag> Tagged<T, Tag> {
     }
 }
 
+
 // For all common primitive types
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {

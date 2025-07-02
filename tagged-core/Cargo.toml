@@ -16,6 +16,11 @@ include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 [dependencies]
 serde = { version = "1.0.219", features = ["derive"], optional = true }
 
+[dev-dependencies]
+uuid = { version = "1.6" , features = ["v4"]}
+chrono = "0.4.41"
+
 [features]
 default = []
 serde = ["dep:serde"]
+full = ["serde"]
