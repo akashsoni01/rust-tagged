@@ -17,7 +17,7 @@ include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 [workspace]
 resolver = "3" # or "3"
 members = [
-    "tagged-core",
+    "tagged-core", "tagged-macros",
 ]
 
 [patch.crates-io]
@@ -25,6 +25,7 @@ tagged-core = { path = "tagged-core" }
 
 [dependencies]
 tagged-core = { path = "tagged-core", version = "0.5.0", features = ["serde"] }
+tagged-macros = {path = "./tagged-macros"}
 
 [dev-dependencies]
 serde = { version = "1.0.210", features = ["derive", "rc"] }

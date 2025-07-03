@@ -1,0 +1,22 @@
+[package]
+name = "tagged-macros"
+version = "0.1.0"
+edition = "2024"
+description = "A lightweight tagged type abstraction for type-safe IDs, etc."
+license = "MPL-2.0"
+authors = ["Codefonsi <info@codefonsi.com>"]
+repository = "https://github.com/akashsoni01/rust-tagged"
+homepage = "https://github.com/akashsoni01/rust-tagged"
+documentation = "https://docs.rs/rust-tagged"
+keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
+categories = ["data-structures"]
+readme = "../README.md"
+include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+#proc-macro2 = "1"
+syn = { version = "2", features = ["full"] }
+quote = "1"

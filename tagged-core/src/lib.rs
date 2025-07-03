@@ -343,6 +343,9 @@ impl<T, Tag> Tagged<T, Tag> {
     }
 }
 
+/// This is just a marker type for macro transformation.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Id<T>(pub T);
 
 // For all common primitive types
 // macro_rules! impl_from_tagged {
