@@ -18,7 +18,6 @@ include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 resolver = "3" # or "3"
 members = [
     "tagged-core",
-    "tagged-macros",
 ]
 
 [patch.crates-io]
