@@ -7,10 +7,20 @@ type EmployeeNames = Tagged<Vec<String>, Org>;
 
 fn main() {
     let names: EmployeeNames = Tagged::new(vec!["Alice".into(), "Bob".into()]);
-    names.iter().for_each(|name| println!("Name: {}", name));
+
+    for name in &names {
+        println!("Name: {name}");
+    }
+
+    // Consuming iterator
+    for name in names {
+        println!("Owned: {name}");
+    }
 }
 
 /*
 Name: Alice
 Name: Bob
+Owned: Alice
+Owned: Bob
 */

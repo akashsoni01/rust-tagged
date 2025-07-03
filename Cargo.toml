@@ -28,7 +28,7 @@ tagged-core = { path = "tagged-core" }
 tagged-core = { path = "tagged-core", version = "0.4.0", features = ["serde"] }
 
 [dev-dependencies]
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.210", features = ["derive", "rc"] }
 serde_json = {version = "1.0.140"}
 
 
