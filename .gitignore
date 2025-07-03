@@ -26,3 +26,6 @@ target/
 /target
 /Cargo.lock
 /.idea
+tagged-core/.idea/vcs.xml
+tagged-core/.idea/tagged-core.iml
+tagged-core/.idea/modules.xml
