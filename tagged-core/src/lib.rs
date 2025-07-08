@@ -348,16 +348,22 @@ impl<T, Tag> Tagged<T, Tag> {
 pub struct Id<T>(pub T);
 
 
-#[cfg(feature = "scylla")]
-impl<T, U> scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue> for Tagged<T, U>
-where
-    T: scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue>,
-{
-    fn from_cql(cql_val: scylla::frame::response::result::CqlValue) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
-        T::from_cql(cql_val).map(Self::new)
-    }
-}
+// #[cfg(feature = "scylla")]
+// impl<T: scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue>, U> scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue> for Tagged<T, U>
+// {
+//     fn from_cql(cql_val: scylla::frame::response::result::CqlValue) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
+//         T::from_cql(cql_val).map(Self::new)
+//     }
+// }
 
+
+// #[cfg(feature = "scylla")]
+// impl<T: scylla::cql_to_rust::FromCqlVal<Option<scylla::frame::response::result::CqlValue>>, U> scylla::cql_to_rust::FromCqlVal<Option<scylla::frame::response::result::CqlValue>> for Tagged<T, U>
+// {
+//     fn from_cql(cql_val: Option<scylla::frame::response::result::CqlValue>) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
+//         T::from_cql(cql_val).map(Self::new)
+//     }
+// }
 
 // impl<T, U> scylla::_macro_internal::Value for Tagged<T, U>
 // where
@@ -368,29 +374,38 @@ where
 //     }
 // }
 
-#[cfg(feature = "scylla")]
-impl<T, U> scylla::frame::value::Value for Tagged<T, U>
-where
-    T: scylla::frame::value::Value,
-{
-    fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::frame::value::ValueTooBig> {
-        self.value().serialize(buf)
-    }
-}
+// #[cfg(feature = "scylla")]
+// impl<T, U> scylla::frame::value::Value for Tagged<T, U>
+// where
+//     T: scylla::frame::value::Value,
+// {
+//     fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::frame::value::ValueTooBig> {
+//         self.value().serialize(buf)
+//     }
+// }
 
-#[cfg(feature = "scylla")]
-impl<T, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
-where
-    T: scylla::_macro_internal::SerializeCql,
-{
-    fn serialize<'b>(
-        &self,
-        type_: &scylla::_macro_internal::ColumnType,
-        writer: scylla::_macro_internal::CellWriter<'b>,
-    ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
-        self.value().serialize(type_, writer)
-    }
-}
+// #[cfg(feature = "scylla")]
+// impl<T, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+// where
+//     T: scylla::_macro_internal::SerializeCql,
+// {
+//     fn serialize<'b>(
+//         &self,
+//         type_: &scylla::_macro_internal::ColumnType,
+//         writer: scylla::_macro_internal::CellWriter<'b>,
+//     ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
+//         self.value().serialize(type_, writer)
+//     }
+// }
+
+// impl<T, U> FromCqlVal<Option<scylla::_macro_internal::CqlValue>> for Tagged<T, U>
+// where
+//     T: FromCqlVal<Option<scylla::_macro_internal::CqlValue>>,
+// {
+//     fn from_cql(val: Option<CqlValue>) -> Result<Self, FromCqlValError> {
+//         T::from_cql(val).map(Tagged::new)
+//     }
+// }
 
 // impl<T, U> scylla::cql_to_rust::FromCqlVal<T> for Tagged<T, U>
 // where
