@@ -347,6 +347,37 @@ impl<T, Tag> Tagged<T, Tag> {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Id<T>(pub T);
 
+
+// use scylla::_macro_internal::Value;
+// use scylla::cql_to_rust::{FromCqlVal, FromCqlValError};
+
+impl<T, U> scylla::_macro_internal::Value for Tagged<T, U>
+where
+    T: scylla::_macro_internal::Value,
+{
+    fn serialize(&self, buf: &mut Vec<u8>) {
+        self.value().serialize(buf);
+    }
+}
+
+impl<'a, T, U> scylla::cql_to_rust::FromCqlVal<'a> for Tagged<T, U>
+where
+    T: scylla::cql_to_rust::FromCqlVal<'a>,
+{
+    fn from_cql(cql_val: scylla::cql_to_rust::CqlValue<'a>) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
+        T::from_cql(cql_val).map(Self::new)
+    }
+}
+
+
+// #[cfg(feature = "scylla")]
+mod scylla_support {
+    use super::*;
+    // use scylla::frame::value::{CqlValue, Value};
+    // use scylla::from_cql_val::FromCqlVal;
+
+}
+
 // For all common primitive types
 // macro_rules! impl_from_tagged {
 //     ($($t:ty),*) => {
