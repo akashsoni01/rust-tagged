@@ -1,9 +1,14 @@
 use scylla::{Session, SessionBuilder};
 use scylla::transport::errors::QueryError;
-use tagged_core::Tagged;
-
+use tagged_core::{AsSlice, Tagged};
 #[derive(Debug)]
 struct UserRow;
+
+impl AsSlice for UserRow {
+    fn as_slice(&self) -> &[u8] {
+        unimplemented!()
+    }   
+}
 type UserId = Tagged<i32, UserRow>;
 
 async fn test() -> Result<(), QueryError> {
@@ -23,5 +28,5 @@ async fn test() -> Result<(), QueryError> {
 }
 
 fn main() {
-    
+
 }

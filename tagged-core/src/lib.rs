@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::Deref;
 use std::hash::{Hash, Hasher};
+use core::num::*;
 
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
@@ -354,40 +355,47 @@ pub struct Id<T>(pub T);
 //     }
 // }
 
-// use scylla::frame::response::result::CqlValue; 
+// use scylla::frame::response::result::CqlValue;
 // use scylla::impl_from_cql_value_from_method;
 // // struct MyBytes(Vec<u8>);
-// 
+//
 // trait CqlValueExt {
 //     fn into_my_bytes(self) -> Option<Tagged<Vec<u8>, Id<Self>>;
 // }
-// 
+//
 // impl CqlValueExt for CqlValue {
 //     fn into_my_bytes(self) -> Option<Tagged<Vec<u8>, Id<Self>> {
 //         Some(MyBytes(self.into_blob()?))
 //     }
 // }
-// 
+//
 // impl_from_cql_value_from_method!(MyBytes, into_my_bytes);
-impl<T, U> scylla::_macro_internal::FromRow for Tagged<T, U>
-where
-    T: scylla::_macro_internal::FromCqlVal<::std::option::Option<scylla::_macro_internal::CqlValue>>
-{
-    fn from_row(row: scylla::_macro_internal::Row) -> ::std::result::Result<Self, scylla::_macro_internal::FromRowError> {
-        use scylla::_macro_internal::{CqlValue, FromCqlVal, FromRow, FromRowError};
-        use ::std::result::Result::{Ok, Err};
-        use ::std::iter::{Iterator, IntoIterator};
-        if 4usize != row.columns.len() { return Err(FromRowError::WrongRowSize { expected: 4usize, actual: row.columns.len() }); }
-        let mut vals_iter = row.columns.into_iter().enumerate();
-        Ok(Tagged::new(
-            {
-                let (col_ix, col_value) = vals_iter.next().unwrap();
-                <T as FromCqlVal<::std::option::Option<CqlValue>>>::from_cql(col_value).map_err(|e| FromRowError::BadCqlVal { err: e, column: col_ix })?
-            },
-        ))
-    }
-}
+// #[cfg(feature = "scylla")]
+// impl<T: scylla::_macro_internal::FromCqlVal<scylla::_macro_internal::CqlValue>, U> scylla::_macro_internal::FromCqlVal<Tagged<scylla::_macro_internal::CqlValue, U>> for Tagged<T, U> {
+//     fn from_cql(cql_val_opt: Tagged<scylla::_macro_internal::CqlValue, U>) -> Result<Self, scylla::_macro_internal::FromCqlValError> {
+//         Ok(Self::new(T::from_cql(cql_val_opt.value)?))
+//     }
+// }
 
+// impl<T, U> scylla::_macro_internal::FromRow for Tagged<T, U>
+// where
+//     T: scylla::_macro_internal::FromCqlVal<::std::option::Option<scylla::_macro_internal::CqlValue>>
+// {
+//     fn from_row(row: scylla::_macro_internal::Row) -> ::std::result::Result<Self, scylla::_macro_internal::FromRowError> {
+//         use scylla::_macro_internal::{CqlValue, FromCqlVal, FromRow, FromRowError};
+//         use ::std::result::Result::{Ok, Err};
+//         use ::std::iter::{Iterator, IntoIterator};
+//         if 4usize != row.columns.len() { return Err(FromRowError::WrongRowSize { expected: 4usize, actual: row.columns.len() }); }
+//         let mut vals_iter = row.columns.into_iter().enumerate();
+//         Ok(Tagged::new(
+//             {
+//                 let (col_ix, col_value) = vals_iter.next().unwrap();
+//                 <T as FromCqlVal<::std::option::Option<CqlValue>>>::from_cql(col_value).map_err(|e| FromRowError::BadCqlVal { err: e, column: col_ix })?
+//             },
+//         ))
+//     }
+// }
+//
 
 // #[cfg(feature = "scylla")]
 // impl<T: scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue>, U> scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue> for Tagged<T, U>
@@ -406,39 +414,107 @@ where
 //     }
 // }
 
-impl<T, U> scylla::_macro_internal::Value for Tagged<T, U>
-where
-    T: scylla::_macro_internal::Value,
-{
-    fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::_macro_internal::ValueTooBig> {
-        self.value().serialize(buf)
-    }
+#[cfg(feature = "scylla")]
+macro_rules! exact_type_check {
+    ($typ:ident, $($cql:tt),*) => {
+        match $typ {
+            $(scylla::_macro_internal::ColumnType::$cql)|* => {},
+            _ => return Err(mk_typck_err::<Self>(
+                $typ,
+                scylla::serialize::value::BuiltinTypeCheckErrorKind::MismatchedType {
+                    expected: &[$(scylla::_macro_internal::ColumnType::$cql),*],
+                }
+            ))
+        }
+    };
 }
 
-// #[cfg(feature = "scylla")]
-// impl<T, U> scylla::frame::value::Value for Tagged<T, U>
-// where
-//     T: scylla::frame::value::Value,
-// {
-//     fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::frame::value::ValueTooBig> {
-//         self.value().serialize(buf)
-//     }
-// }
 
 #[cfg(feature = "scylla")]
-impl<T, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
-where
-    T: scylla::_macro_internal::SerializeCql,
-{
-    fn serialize<'b>(
-        &self,
-        type_: &scylla::_macro_internal::ColumnType,
-        writer: scylla::_macro_internal::CellWriter<'b>,
-    ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
-        self.value().serialize(type_, writer)
-    }
+fn mk_typck_err<T>(
+    got: &scylla::_macro_internal::ColumnType,
+    kind: impl Into<scylla::serialize::value::BuiltinTypeCheckErrorKind>,
+) -> scylla::_macro_internal::SerializationError {
+    mk_typck_err_named(std::any::type_name::<T>(), got, kind)
 }
 
+#[cfg(feature = "scylla")]
+fn mk_typck_err_named(
+    name: &'static str,
+    got: &scylla::_macro_internal::ColumnType,
+    kind: impl Into<scylla::serialize::value::BuiltinTypeCheckErrorKind>,
+) -> scylla::_macro_internal::SerializationError {
+    scylla::_macro_internal::SerializationError::new(scylla::serialize::value::BuiltinTypeCheckError {
+        rust_name: name,
+        got: got.clone(),
+        kind: kind.into(),
+    })
+}
+
+
+#[cfg(feature = "scylla")]
+macro_rules! impl_serialize_via_writer {
+    (|$me:ident, $writer:ident| $e:expr) => {
+        impl_serialize_via_writer!(|$me, _typ, $writer| $e);
+    };
+    (|$me:ident, $typ:ident, $writer:ident| $e:expr) => {
+        fn serialize<'b>(
+            &self,
+            typ: &scylla::_macro_internal::ColumnType,
+            writer: scylla::_macro_internal::CellWriter<'b>,
+        ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::_macro_internal::SerializationError> {
+            let $writer = writer;
+            let $typ = typ;
+            let $me = self;
+            let proof = $e;
+            Ok(proof)
+        }
+    };
+}
+pub trait AsSlice {
+    fn as_slice(&self) -> &[u8];
+}
+
+#[cfg(feature = "scylla")]
+impl<T: AsSlice, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+{
+    impl_serialize_via_writer!(|me, typ, writer| {
+        exact_type_check!(typ, TinyInt);
+        writer.set_value(me.value.as_slice()).unwrap()
+    });
+}
+
+
+
+// impl SerializeCql for i16 {
+//     impl_serialize_via_writer!(|me, typ, writer| {
+//         exact_type_check!(typ, SmallInt);
+//         writer.set_value(me.to_be_bytes().as_slice()).unwrap()
+//     });
+// }
+
+// #[cfg(feature = "scylla")]
+// impl<i16, U> SerializeCql for Tagged<i16, U> {
+//     impl_serialize_via_writer!(|me, typ, writer| {
+//         exact_type_check!(typ, SmallInt);
+//         writer.set_value(me.value.to_be_bytes().as_slice()).unwrap()
+//     });
+// }
+
+// #[cfg(feature = "scylla")]
+// impl<T, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+// where
+//     T: scylla::_macro_internal::SerializeCql,
+// {
+//     fn serialize<'b>(
+//         &self,
+//         type_: &scylla::_macro_internal::ColumnType,
+//         writer: scylla::_macro_internal::CellWriter<'b>,
+//     ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
+//         self.value().serialize(type_, writer)
+//     }
+// }
+//
 // impl<T, U> FromCqlVal<Option<scylla::_macro_internal::CqlValue>> for Tagged<T, U>
 // where
 //     T: FromCqlVal<Option<scylla::_macro_internal::CqlValue>>,
