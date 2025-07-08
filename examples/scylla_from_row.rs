@@ -8,7 +8,7 @@ use uuid::Uuid;
 struct UserTag;
 type UserId = Tagged<UserTag, Uuid>;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, )]
 struct User {
     id: UserId,
     name: String,

@@ -30,7 +30,7 @@ tagged-macros = {path = "./tagged-macros"}
 [dev-dependencies]
 serde = { version = "1.0.210", features = ["derive", "rc"] }
 serde_json = {version = "1.0.140"}
-
+scylla = { version = "0.13", features = ["chrono"] }
 
 [workspace.dependencies]
 

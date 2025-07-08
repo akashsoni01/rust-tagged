@@ -348,35 +348,58 @@ impl<T, Tag> Tagged<T, Tag> {
 pub struct Id<T>(pub T);
 
 
-// use scylla::_macro_internal::Value;
-// use scylla::cql_to_rust::{FromCqlVal, FromCqlValError};
-
-impl<T, U> scylla::_macro_internal::Value for Tagged<T, U>
+#[cfg(feature = "scylla")]
+impl<T, U> scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue> for Tagged<T, U>
 where
-    T: scylla::_macro_internal::Value,
+    T: scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue>,
 {
-    fn serialize(&self, buf: &mut Vec<u8>) {
-        self.value().serialize(buf);
-    }
-}
-
-impl<'a, T, U> scylla::cql_to_rust::FromCqlVal<'a> for Tagged<T, U>
-where
-    T: scylla::cql_to_rust::FromCqlVal<'a>,
-{
-    fn from_cql(cql_val: scylla::cql_to_rust::CqlValue<'a>) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
+    fn from_cql(cql_val: scylla::frame::response::result::CqlValue) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
         T::from_cql(cql_val).map(Self::new)
     }
 }
 
 
-// #[cfg(feature = "scylla")]
-mod scylla_support {
-    use super::*;
-    // use scylla::frame::value::{CqlValue, Value};
-    // use scylla::from_cql_val::FromCqlVal;
+// impl<T, U> scylla::_macro_internal::Value for Tagged<T, U>
+// where
+//     T: scylla::_macro_internal::Value,
+// {
+//     fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::_macro_internal::ValueTooBig> {
+//         self.value().serialize(buf)
+//     }
+// }
 
+#[cfg(feature = "scylla")]
+impl<T, U> scylla::frame::value::Value for Tagged<T, U>
+where
+    T: scylla::frame::value::Value,
+{
+    fn serialize(&self, buf: &mut Vec<u8>) -> Result<(), scylla::frame::value::ValueTooBig> {
+        self.value().serialize(buf)
+    }
 }
+
+#[cfg(feature = "scylla")]
+impl<T, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+where
+    T: scylla::_macro_internal::SerializeCql,
+{
+    fn serialize<'b>(
+        &self,
+        type_: &scylla::_macro_internal::ColumnType,
+        writer: scylla::_macro_internal::CellWriter<'b>,
+    ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
+        self.value().serialize(type_, writer)
+    }
+}
+
+// impl<T, U> scylla::cql_to_rust::FromCqlVal<T> for Tagged<T, U>
+// where
+//     T: scylla::cql_to_rust::FromCqlVal<T>,
+// {
+//     fn from_cql(cql_val: T) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
+//         T::from_cql(cql_val).map(Self::new)
+//     }
+// }
 
 // For all common primitive types
 // macro_rules! impl_from_tagged {
