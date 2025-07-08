@@ -4,6 +4,8 @@ use tagged_core::Tagged;
 use std::error::Error;
 
 #[derive(Debug, FromRow)]
+struct User(Tagged<i32, Self>);
+#[derive(Debug, FromRow)]
 struct UserRow {
     id: Tagged<i32, Self>,
     // name: Option<Tagged<String, Self>>,
