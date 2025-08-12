@@ -18,7 +18,7 @@
 * [Phantom types in Haskell](https://wiki.haskell.org/Phantom_type)
 * [Newtype pattern in Rust](https://doc.rust-lang.org/rust-by-example/generics/new_types.html)
 * [Algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type)
-
+* [Communicating in Types](https://youtu.be/SOz66dcsuT8?t=1483)
 ---
 
 ## ✨ Features
