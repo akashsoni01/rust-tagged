@@ -1,4 +1,4 @@
-# rust-tagged (v0.4.0)
+# rust-tagged (v0.5.0)
 
 > A lightweight, extensible system for creating type-safe IDs, email addresses, and domain-specific values using Rust's type system.
 
@@ -10,6 +10,7 @@
 * Enforce domain modeling in code via the type system
 * Ergonomic `.into()` support for primitive conversions
 * Optional serde and macro support for clean `#[derive(Tagged)]`
+* Scylla CQL integration with `FromRow` derive support
 
 ### 📚 Conceptual References
 
@@ -27,6 +28,8 @@
 * Lightweight `Tagged<T, Tag>` abstraction
 * `From<T>` and `Into<T>` implementations for easy use
 * Optional `Deref`, `Display`, `Serialize`, and `Deserialize` support
+* Scylla CQL integration with `FromCqlVal` and `SerializeCql` trait implementations
+* `FromRow` derive support for seamless database integration
 
 ---
 
@@ -34,15 +37,31 @@
 
 ```toml
 [dependencies]
-rust-tagged = "0.4.0"
+rust-tagged = "0.5.0"
 ```
 
 To enable serde support:
 
 ```toml
 [dependencies.rust-tagged]
-version = "0.4.0"
+version = "0.5.0"
 features = ["serde"]
+```
+
+To enable Scylla CQL support:
+
+```toml
+[dependencies.rust-tagged]
+version = "0.5.0"
+features = ["scylla"]
+```
+
+To enable both serde and Scylla support:
+
+```toml
+[dependencies.rust-tagged]
+version = "0.5.0"
+features = ["full"]
 ```
 ## 🧪 Example - Debug
 
@@ -270,6 +289,99 @@ fn main() {
 
 ---
 
+
+---
+
+## 🗄️ Example - Scylla CQL Integration
+
+```rust
+use scylla::{FromRow, Session, SessionBuilder};
+use scylla::transport::session::IntoTypedRows;
+use rust_tagged::Tagged;
+use uuid::Uuid;
+
+// Define tag types for different domain concepts
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct UserIdTag;
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct EmailTag;
+
+// Create tagged type aliases
+type UserId = Tagged<Uuid, UserIdTag>;
+type Email = Tagged<String, EmailTag>;
+
+// User entity with Tagged fields
+#[derive(Debug, Clone, FromRow)]
+struct User {
+    id: UserId,
+    name: String,
+    email: Email,
+    age: Option<i32>,
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Connect to Scylla cluster
+    let session: Session = SessionBuilder::new()
+        .known_node("127.0.0.1:9042")
+        .build()
+        .await?;
+
+    // Create table
+    session
+        .query(
+            "CREATE TABLE IF NOT EXISTS demo.users (
+                id UUID PRIMARY KEY,
+                name TEXT,
+                email TEXT,
+                age INT
+            )",
+            &[],
+        )
+        .await?;
+
+    // Insert user
+    let user = User {
+        id: UserId::from(Uuid::new_v4()),
+        name: "Alice Johnson".to_string(),
+        email: Email::from("alice@example.com".to_string()),
+        age: Some(28),
+    };
+
+    session
+        .query(
+            "INSERT INTO demo.users (id, name, email, age) VALUES (?, ?, ?, ?)",
+            (
+                user.id.value(),
+                &user.name,
+                user.email.value(),
+                user.age,
+            ),
+        )
+        .await?;
+
+    // Query users using FromRow derive
+    let user_rows = session
+        .query("SELECT id, name, email, age FROM demo.users", &[])
+        .await?
+        .rows
+        .ok_or("No rows returned")?;
+
+    for row in user_rows.into_typed::<User>() {
+        let fetched_user = row?;
+        println!("User: {:?}", fetched_user);
+        // Type safety: fetched_user.id is UserId, fetched_user.email is Email
+    }
+
+    Ok(())
+}
+```
+
+This example demonstrates:
+- Type-safe database operations with Tagged types
+- `FromRow` derive working seamlessly with Tagged fields
+- Prevention of ID mixups at compile time
+- Clean integration with Scylla CQL queries
 
 ---
 

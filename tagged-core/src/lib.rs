@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::Deref;
 use std::hash::{Hash, Hasher};
-use core::num::*;
 
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
@@ -414,75 +413,27 @@ pub struct Id<T>(pub T);
 //     }
 // }
 
-#[cfg(feature = "scylla")]
-macro_rules! exact_type_check {
-    ($typ:ident, $($cql:tt),*) => {
-        match $typ {
-            $(scylla::_macro_internal::ColumnType::$cql)|* => {},
-            _ => return Err(mk_typck_err::<Self>(
-                $typ,
-                scylla::serialize::value::BuiltinTypeCheckErrorKind::MismatchedType {
-                    expected: &[$(scylla::_macro_internal::ColumnType::$cql),*],
-                }
-            ))
-        }
-    };
-}
-
 
 #[cfg(feature = "scylla")]
-fn mk_typck_err<T>(
-    got: &scylla::_macro_internal::ColumnType,
-    kind: impl Into<scylla::serialize::value::BuiltinTypeCheckErrorKind>,
-) -> scylla::_macro_internal::SerializationError {
-    mk_typck_err_named(std::any::type_name::<T>(), got, kind)
-}
-
-#[cfg(feature = "scylla")]
-fn mk_typck_err_named(
-    name: &'static str,
-    got: &scylla::_macro_internal::ColumnType,
-    kind: impl Into<scylla::serialize::value::BuiltinTypeCheckErrorKind>,
-) -> scylla::_macro_internal::SerializationError {
-    scylla::_macro_internal::SerializationError::new(scylla::serialize::value::BuiltinTypeCheckError {
-        rust_name: name,
-        got: got.clone(),
-        kind: kind.into(),
-    })
-}
-
-
-#[cfg(feature = "scylla")]
-macro_rules! impl_serialize_via_writer {
-    (|$me:ident, $writer:ident| $e:expr) => {
-        impl_serialize_via_writer!(|$me, _typ, $writer| $e);
-    };
-    (|$me:ident, $typ:ident, $writer:ident| $e:expr) => {
-        fn serialize<'b>(
-            &self,
-            typ: &scylla::_macro_internal::ColumnType,
-            writer: scylla::_macro_internal::CellWriter<'b>,
-        ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::_macro_internal::SerializationError> {
-            let $writer = writer;
-            let $typ = typ;
-            let $me = self;
-            let proof = $e;
-            Ok(proof)
-        }
-    };
-}
-pub trait AsSlice {
-    fn as_slice(&self) -> &[u8];
-}
-
-#[cfg(feature = "scylla")]
-impl<T: AsSlice, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+impl<T: scylla::_macro_internal::SerializeCql, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
 {
-    impl_serialize_via_writer!(|me, typ, writer| {
-        exact_type_check!(typ, TinyInt);
-        writer.set_value(me.value.as_slice()).unwrap()
-    });
+    fn serialize<'b>(
+        &self,
+        typ: &scylla::_macro_internal::ColumnType,
+        writer: scylla::_macro_internal::CellWriter<'b>,
+    ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::_macro_internal::SerializationError> {
+        self.value.serialize(typ, writer)
+    }
 }
+
+#[cfg(feature = "scylla")]
+impl<T: scylla::_macro_internal::FromCqlVal<scylla::_macro_internal::CqlValue>, U> scylla::_macro_internal::FromCqlVal<scylla::_macro_internal::CqlValue> for Tagged<T, U>
+{
+    fn from_cql(cql_val: scylla::_macro_internal::CqlValue) -> Result<Self, scylla::_macro_internal::FromCqlValError> {
+        T::from_cql(cql_val).map(Self::new)
+    }
+}
+
 
 
 
