@@ -37,22 +37,22 @@
 
 ```toml
 [dependencies]
-rust-tagged = "0.5.0"
+rust-tagged = "_._._"
 ```
 
 To enable serde support:
 
 ```toml
 [dependencies.rust-tagged]
-version = "0.5.0"
-features = ["serde"]
+version = "_._._"
+features = ["full"] # for serde and scylla
 ```
 
 To enable Scylla CQL support:
 
 ```toml
 [dependencies.rust-tagged]
-version = "0.5.0"
+version = "_._._"
 features = ["scylla"]
 ```
 
@@ -60,7 +60,7 @@ To enable both serde and Scylla support:
 
 ```toml
 [dependencies.rust-tagged]
-version = "0.5.0"
+version = "_._._"
 features = ["full"]
 ```
 ## 🧪 Example - Debug

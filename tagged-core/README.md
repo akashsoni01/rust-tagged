@@ -33,14 +33,14 @@
 
 ```toml
 [dependencies]
-rust-tagged = "0.4.0"
+rust-tagged = "_._._"
 ```
 
 To enable serde support:
 
 ```toml
 [dependencies.rust-tagged]
-version = "0.4.0"
+version = "_._._"
 features = ["serde"]
 ```
 ## 🧪 Example - Debug
