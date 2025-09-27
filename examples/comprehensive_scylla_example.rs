@@ -46,7 +46,7 @@ struct Product {
     price: Price,
     category: String,
     in_stock: bool,
-    tags: Vec<String>,
+    tags: Option<Vec<String>>,
     created_at: DateTime<Utc>,
 }
 
@@ -86,7 +86,7 @@ impl Product {
             price: Price::from(price_cents),
             category: category.into(),
             in_stock: true,
-            tags: Vec::new(),
+            tags: Some(Vec::new()),
             created_at: Utc::now(),
         }
     }
@@ -226,7 +226,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 product.price.value(),
                 &product.category,
                 product.in_stock,
-                &product.tags,
+                product.tags.as_ref(),
                 product.created_at,
             ),
         )
@@ -305,23 +305,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!();
     }
 
-    // Complex query: Join users and orders
+    // Complex query: Get orders with user information
     println!("=== Complex Query: User Orders ===");
-    let complex_rows = session
+    let order_rows = session
         .query(
-            "SELECT u.id as user_id, u.name, u.email, o.id as order_id, o.total_price, o.status 
-             FROM ecommerce.users u 
-             JOIN ecommerce.orders o ON u.id = o.user_id",
+            "SELECT id, user_id, product_id, quantity, total_price, status, order_date, notes FROM ecommerce.orders",
             &[]
         )
         .await?
         .rows
         .ok_or("No rows returned")?;
 
-    for row in complex_rows {
-        let (_user_id, name, email, order_id, total_price, status): (Uuid, String, String, Uuid, i32, String) = row.into_typed()?;
-        println!("User: {} ({}) - Order: {} - Total: ${:.2} - Status: {}", 
-                 name, email, order_id, total_price as f64 / 100.0, status);
+    for row in order_rows.into_typed::<Order>() {
+        let order = row?;
+        
+        // Get user information for this order
+        let user_rows = session
+            .query(
+                "SELECT id, name, email, age, is_active, created_at, metadata FROM ecommerce.users WHERE id = ?",
+                (order.user_id.value(),)
+            )
+            .await?
+            .rows
+            .ok_or("No rows returned")?;
+
+        for user_row in user_rows.into_typed::<User>() {
+            let user = user_row?;
+            println!("User: {} ({}) - Order: {} - Total: ${:.2} - Status: {}", 
+                     user.name, user.email.value(), order.id.value(), 
+                     *order.total_price.value() as f64 / 100.0, order.status);
+        }
     }
 
     // Update order status
