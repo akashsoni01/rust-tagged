@@ -1,6 +1,6 @@
 [package]
 name = "rust-tagged"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
 license = "MPL-2.0"
@@ -17,15 +17,15 @@ include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
 [workspace]
 resolver = "3" # or "3"
 members = [
-    "tagged-core", "tagged-macros",
+    "tagged-core"
 ]
 
 [patch.crates-io]
 tagged-core = { path = "tagged-core" }
 
 [dependencies]
-tagged-core = { path = "tagged-core", version = "0.6.0", features = ["serde"] }
-tagged-macros = {path = "./tagged-macros"}
+tagged-core = { path = "tagged-core", version = "0.7.0", features = ["serde"] }
+#tagged-macros = {path = "./tagged-macros"}
 
 [dev-dependencies]
 serde = { version = "1.0.210", features = ["derive", "rc"] }
