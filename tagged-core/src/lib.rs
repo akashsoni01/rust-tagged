@@ -415,21 +415,21 @@ pub struct Id<T>(pub T);
 
 
 #[cfg(feature = "scylla")]
-impl<T: scylla::_macro_internal::SerializeCql, U> scylla::_macro_internal::SerializeCql for Tagged<T, U>
+impl<T: scylla::serialize::value::SerializeCql, U> scylla::serialize::value::SerializeCql for Tagged<T, U>
 {
     fn serialize<'b>(
         &self,
-        typ: &scylla::_macro_internal::ColumnType,
-        writer: scylla::_macro_internal::CellWriter<'b>,
-    ) -> Result<scylla::_macro_internal::WrittenCellProof<'b>, scylla::_macro_internal::SerializationError> {
+        typ: &scylla::frame::response::result::ColumnType,
+        writer: scylla::serialize::writers::CellWriter<'b>,
+    ) -> Result<scylla::serialize::writers::WrittenCellProof<'b>, scylla::serialize::SerializationError> {
         self.value.serialize(typ, writer)
     }
 }
 
 #[cfg(feature = "scylla")]
-impl<T: scylla::_macro_internal::FromCqlVal<scylla::_macro_internal::CqlValue>, U> scylla::_macro_internal::FromCqlVal<scylla::_macro_internal::CqlValue> for Tagged<T, U>
+impl<T: scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue>, U> scylla::cql_to_rust::FromCqlVal<scylla::frame::response::result::CqlValue> for Tagged<T, U>
 {
-    fn from_cql(cql_val: scylla::_macro_internal::CqlValue) -> Result<Self, scylla::_macro_internal::FromCqlValError> {
+    fn from_cql(cql_val: scylla::frame::response::result::CqlValue) -> Result<Self, scylla::cql_to_rust::FromCqlValError> {
         T::from_cql(cql_val).map(Self::new)
     }
 }

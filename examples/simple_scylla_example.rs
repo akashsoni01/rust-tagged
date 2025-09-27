@@ -36,10 +36,24 @@ impl User {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Connect to Scylla cluster
-    let session: Session = SessionBuilder::new()
+    let session: Session = match SessionBuilder::new()
         .known_node("127.0.0.1:9042")
         .build()
-        .await?;
+        .await
+    {
+        Ok(session) => session,
+        Err(e) => {
+            println!("⚠️  Could not connect to Scylla database: {}", e);
+            println!("This example requires a running Scylla/Cassandra instance on 127.0.0.1:9042");
+            println!("To run this example:");
+            println!("1. Start Scylla: docker run --name scylla -p 9042:9042 -d scylladb/scylla");
+            println!("2. Wait for it to start: docker exec scylla nodetool status");
+            println!("3. Run this example again");
+            println!("\nAlternatively, run the mock example that doesn't require a database:");
+            println!("cargo run --example mock_scylla_example --features scylla");
+            return Ok(());
+        }
+    };
 
     // Create keyspace and table
     session
