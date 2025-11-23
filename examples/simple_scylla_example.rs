@@ -37,7 +37,7 @@ impl User {
 fn lookup_user<T: Taggable>(user_id: &T) {
     println!("✓ Looking up user with ID (type: {})", user_id.type_name());
     // This function only accepts Tagged types, not raw Uuid
-    // lookup_user(&Uuid::new_v4()); // ✗ Compile error!
+    // 
 }
 
 fn send_notification<T: Taggable>(email: &T) {
