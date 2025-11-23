@@ -1,6 +1,6 @@
 [package]
 name = "rust-tagged"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
 license = "MPL-2.0"
@@ -11,7 +11,23 @@ documentation = "https://docs.rs/rust-tagged"
 keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
 categories = ["data-structures"]
 readme = "./README.md"
-include = ["src/**/*", "Cargo.toml", "../../README.md", "LICENSE"]
+exclude = [
+    "examples/**/*",
+    "tests/**/*",
+    "benches/**/*",
+    "tagged-core/examples/**/*",
+    "tagged-core/tests/**/*",
+    "tagged-core/README.md",
+    "tagged-macros/examples/**/*",
+    "tagged-macros/tests/**/*",
+    "tagged-macros/README.md",
+    "**/*_test.rs",
+    "**/*_tests.rs",
+    ".DS_Store",
+    ".idea/**/*",
+    ".github/**/*",
+    ".gitignore",
+]
 
 
 [workspace]
@@ -24,7 +40,7 @@ members = [
 tagged-core = { path = "tagged-core" }
 
 [dependencies]
-tagged-core = { path = "tagged-core", version = "0.7.0", features = ["serde"] }
+tagged-core = { path = "tagged-core", version = "0.8.0", features = ["serde"] }
 #tagged-macros = {path = "./tagged-macros"}
 
 [dev-dependencies]
