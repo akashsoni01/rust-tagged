@@ -1,6 +1,6 @@
 use scylla::{FromRow, Session, SessionBuilder};
 use scylla::transport::session::IntoTypedRows;
-use rust_tagged::Tagged;
+use rust_tagged::{Tagged, Taggable};
 use uuid::Uuid;
 
 // Define tag types for different domain concepts
@@ -31,6 +31,19 @@ impl User {
             age,
         }
     }
+}
+
+// Functions that enforce Taggable types - preventing use of raw primitives
+fn lookup_user<T: Taggable>(user_id: &T) {
+    println!("✓ Looking up user with ID (type: {})", user_id.type_name());
+    // This function only accepts Tagged types, not raw Uuid
+    // lookup_user(&Uuid::new_v4()); // ✗ Compile error!
+}
+
+fn send_notification<T: Taggable>(email: &T) {
+    println!("✓ Sending notification to email (type: {})", email.type_name());
+    // This function only accepts Tagged types, not raw String
+    // send_notification(&"test@example.com".to_string()); // ✗ Compile error!
 }
 
 #[tokio::main]
@@ -127,12 +140,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  UserId: {}", user_id_from_uuid.value());
     println!("  Email: {}", email_from_string.value());
 
+    // Demonstrate Taggable trait enforcement
+    println!("\n=== Taggable Trait Enforcement ===");
+    lookup_user(&user.id);
+    send_notification(&user.email);
+    
+    // These would cause compile errors if uncommented:
+    // lookup_user(&Uuid::new_v4()); // ✗ Error: expected Taggable, found Uuid
+    // send_notification(&"test@example.com".to_string()); // ✗ Error: expected Taggable, found String
+    
+    println!("✓ Taggable trait enforces use of Tagged types in function signatures");
+
     println!("\n=== Example completed successfully! ===");
     println!("This example demonstrates:");
     println!("1. Tagged types for type-safe IDs and domain values");
-    println!("2. FromRow derive working with Tagged types");
-    println!("3. Mixed field types in CQL queries (Tagged + primitive types)");
-    println!("4. Type safety preventing ID mixups");
+    println!("2. Taggable trait to enforce Tagged types in function signatures");
+    println!("3. FromRow derive working with Tagged types");
+    println!("4. Mixed field types in CQL queries (Tagged + primitive types)");
+    println!("5. Type safety preventing ID mixups");
 
     Ok(())
 }

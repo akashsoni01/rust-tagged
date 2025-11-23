@@ -1,6 +1,6 @@
 use scylla::{FromRow, Session, SessionBuilder};
 use scylla::transport::session::IntoTypedRows;
-use rust_tagged::Tagged;
+use rust_tagged::{Tagged, Taggable};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
@@ -106,6 +106,31 @@ impl Order {
             notes: None,
         }
     }
+}
+
+// Functions that enforce Taggable types - preventing use of raw primitives
+fn validate_user_id<T: Taggable>(user_id: &T) {
+    println!("✓ Validating user ID (type: {})", user_id.type_name());
+    // This function only accepts Tagged types, not raw Uuid
+    // validate_user_id(&Uuid::new_v4()); // ✗ Compile error!
+}
+
+fn process_product_id<T: Taggable>(product_id: &T) {
+    println!("✓ Processing product ID (type: {})", product_id.type_name());
+    // This function only accepts Tagged types, not raw Uuid
+    // process_product_id(&Uuid::new_v4()); // ✗ Compile error!
+}
+
+fn calculate_price<T: Taggable>(price: &T) -> String {
+    format!("Price type: {}", price.type_name())
+    // This function only accepts Tagged types, not raw i32
+    // calculate_price(&99999); // ✗ Compile error!
+}
+
+fn send_email<T: Taggable>(email: &T) {
+    println!("✓ Sending email (type: {})", email.type_name());
+    // This function only accepts Tagged types, not raw String
+    // send_email(&"test@example.com".to_string()); // ✗ Compile error!
 }
 
 #[tokio::main]
@@ -377,13 +402,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  UserId: {}", user_id_from_uuid.value());
     println!("  ProductId: {}", product_id_from_uuid.value());
 
+    // Demonstrate Taggable trait enforcement
+    println!("\n=== Taggable Trait Enforcement ===");
+    validate_user_id(&user.id);
+    process_product_id(&product.id);
+    println!("{}", calculate_price(&product.price));
+    send_email(&user.email);
+    
+    // These would cause compile errors if uncommented:
+    // validate_user_id(&Uuid::new_v4()); // ✗ Error: expected Taggable, found Uuid
+    // process_product_id(&Uuid::new_v4()); // ✗ Error: expected Taggable, found Uuid
+    // calculate_price(&99999); // ✗ Error: expected Taggable, found integer
+    // send_email(&"test@example.com".to_string()); // ✗ Error: expected Taggable, found String
+    
+    println!("✓ Taggable trait enforces use of Tagged types in function signatures");
+
     println!("\n=== Example completed successfully! ===");
     println!("This example demonstrates:");
     println!("1. Tagged types for type-safe IDs and domain values");
-    println!("2. FromRow derive working with Tagged types");
-    println!("3. Mixed field types in CQL queries (Tagged + primitive types)");
-    println!("4. Complex queries and relationships");
-    println!("5. Type safety preventing ID mixups");
+    println!("2. Taggable trait to enforce Tagged types in function signatures");
+    println!("3. FromRow derive working with Tagged types");
+    println!("4. Mixed field types in CQL queries (Tagged + primitive types)");
+    println!("5. Complex queries and relationships");
+    println!("6. Type safety preventing ID mixups");
 
     Ok(())
 }

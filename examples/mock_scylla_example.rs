@@ -1,5 +1,5 @@
 use scylla::FromRow;
-use rust_tagged::Tagged;
+use rust_tagged::{Tagged, Taggable};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
@@ -75,6 +75,25 @@ impl Product {
     }
 }
 
+// Functions that enforce Taggable types - preventing use of raw primitives
+fn authenticate_user<T: Taggable>(user_id: &T) {
+    println!("✓ Authenticating user with ID (type: {})", user_id.type_name());
+    // This function only accepts Tagged types, not raw Uuid
+    // authenticate_user(&Uuid::new_v4()); // ✗ Compile error!
+}
+
+fn send_welcome_email<T: Taggable>(email: &T) {
+    println!("✓ Sending welcome email (type: {})", email.type_name());
+    // This function only accepts Tagged types, not raw String
+    // send_welcome_email(&"test@example.com".to_string()); // ✗ Compile error!
+}
+
+fn display_price<T: Taggable>(price: &T) {
+    println!("✓ Displaying price (type: {})", price.type_name());
+    // This function only accepts Tagged types, not raw i32
+    // display_price(&99999); // ✗ Compile error!
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("=== Mock Scylla CQL Example with Tagged Types ===\n");
 
@@ -100,6 +119,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  UserId: {}", user_id_from_uuid.value());
     println!("  ProductId: {}", product_id_from_uuid.value());
     println!("  Email: {}", email_from_string.value());
+
+    // Demonstrate Taggable trait enforcement
+    println!("\n=== Taggable Trait Enforcement ===");
+    authenticate_user(&user.id);
+    send_welcome_email(&user.email);
+    display_price(&product.price);
+    
+    // These would cause compile errors if uncommented:
+    // authenticate_user(&Uuid::new_v4()); // ✗ Error: expected Taggable, found Uuid
+    // send_welcome_email(&"test@example.com".to_string()); // ✗ Error: expected Taggable, found String
+    // display_price(&99999); // ✗ Error: expected Taggable, found integer
+    
+    println!("✓ Taggable trait enforces use of Tagged types in function signatures");
 
     // Demonstrate serialization
     println!("\n=== Serialization Demonstration ===");
@@ -160,11 +192,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n=== Example completed successfully! ===");
     println!("This example demonstrates:");
     println!("1. Tagged types for type-safe IDs and domain values");
-    println!("2. FromRow derive working with Tagged types");
-    println!("3. Mixed field types in CQL queries (Tagged + primitive types)");
-    println!("4. Type safety preventing ID mixups");
-    println!("5. Serialization/Deserialization support");
-    println!("6. CQL query parameter compatibility");
+    println!("2. Taggable trait to enforce Tagged types in function signatures");
+    println!("3. FromRow derive working with Tagged types");
+    println!("4. Mixed field types in CQL queries (Tagged + primitive types)");
+    println!("5. Type safety preventing ID mixups");
+    println!("6. Serialization/Deserialization support");
+    println!("7. CQL query parameter compatibility");
 
     Ok(())
 }

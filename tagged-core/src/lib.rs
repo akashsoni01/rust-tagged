@@ -34,6 +34,40 @@ pub struct Tagged<T, Tag> {
     _marker: std::marker::PhantomData<Tag>,
 }
 
+/// Trait to enforce the use of Tagged types in function signatures.
+/// This prevents accidental use of raw primitives and ensures type safety.
+///
+/// # Example
+///
+/// ```rust
+/// use tagged_core::{Tagged, Taggable};
+///
+/// #[derive(Debug)]
+/// struct UserIdTag;
+/// type UserId = Tagged<u32, UserIdTag>;
+///
+/// fn process_user_id<T: Taggable>(id: T) {
+///     // This function only accepts Tagged types, not raw u32
+///     println!("Processing user ID: {:?}", id);
+/// }
+///
+/// fn main() {
+///     let user_id: UserId = 42.into();
+///     process_user_id(user_id); // ✓ Works
+///     // process_user_id(42);    // ✗ Compile error: expected Taggable, found integer
+/// }
+/// ```
+pub trait Taggable {
+    /// Get the inner value type name for debugging
+    fn type_name(&self) -> &'static str;
+}
+
+impl<T, Tag> Taggable for Tagged<T, Tag> {
+    fn type_name(&self) -> &'static str {
+        std::any::type_name::<T>()
+    }
+}
+
 impl<T, Tag> Tagged<T, Tag> {
     pub fn new(value: T) -> Self {
         Self {
