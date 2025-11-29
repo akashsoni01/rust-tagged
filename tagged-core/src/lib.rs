@@ -103,6 +103,148 @@ impl<Tag> From<&String> for Tagged<String, Tag> {
     }
 }
 
+/// Support JSON string deserialization into `Tagged<T, Tag>`
+/// 
+/// # Example
+/// 
+/// ```rust,no_run
+/// use tagged_core::Tagged;
+/// use serde::Deserialize;
+/// use std::convert::TryFrom;
+/// 
+/// #[derive(Debug, Deserialize)]
+/// struct UserIdTag;
+/// 
+/// type UserId = Tagged<u32, UserIdTag>;
+/// 
+/// fn main() {
+///     let json = "42";
+///     let user_id: UserId = Tagged::from_json(json).unwrap();
+///     println!("User ID: {}", user_id.value());
+/// }
+/// ```
+#[cfg(feature = "serde")]
+impl<T, Tag> Tagged<T, Tag>
+where
+    T: serde::de::DeserializeOwned,
+{
+    /// Deserialize a JSON string into a `Tagged` type
+    /// 
+    /// Requires the `serde` feature to be enabled.
+    /// 
+    /// # Errors
+    /// 
+    /// Returns a `serde_json::Error` if the JSON string cannot be deserialized into type `T`
+    /// 
+    /// # Example
+    /// 
+    /// ```rust,no_run
+    /// use tagged_core::Tagged;
+    /// use serde::Deserialize;
+    /// 
+    /// #[derive(Debug, Deserialize)]
+    /// struct UserIdTag;
+    /// 
+    /// type UserId = Tagged<u32, UserIdTag>;
+    /// 
+    /// fn main() {
+    ///     let json = "42";
+    ///     let user_id: UserId = Tagged::from_json(json).unwrap();
+    ///     println!("User ID: {}", user_id.value());
+    /// }
+    /// ```
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json).map(Self::new)
+    }
+
+    /// Deserialize a JSON string from a `String` into a `Tagged` type
+    /// 
+    /// Requires the `serde` feature to be enabled.
+    /// 
+    /// # Errors
+    /// 
+    /// Returns a `serde_json::Error` if the JSON string cannot be deserialized into type `T`
+    /// 
+    /// # Example
+    /// 
+    /// ```rust,no_run
+    /// use tagged_core::Tagged;
+    /// use serde::Deserialize;
+    /// 
+    /// #[derive(Debug, Deserialize)]
+    /// struct UserIdTag;
+    /// 
+    /// type UserId = Tagged<u32, UserIdTag>;
+    /// 
+    /// fn main() {
+    ///     let json = String::from("42");
+    ///     let user_id: UserId = Tagged::from_json_string(json).unwrap();
+    ///     println!("User ID: {}", user_id.value());
+    /// }
+    /// ```
+    pub fn from_json_string(json: String) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(&json).map(Self::new)
+    }
+
+    /// Serialize a `Tagged` type into a JSON string
+    /// 
+    /// Requires the `serde` feature to be enabled.
+    /// 
+    /// # Errors
+    /// 
+    /// Returns a `serde_json::Error` if the value cannot be serialized to JSON
+    /// 
+    /// # Example
+    /// 
+    /// ```rust,no_run
+    /// use tagged_core::Tagged;
+    /// use serde::Serialize;
+    /// 
+    /// #[derive(Debug, Serialize)]
+    /// struct UserIdTag;
+    /// 
+    /// type UserId = Tagged<u32, UserIdTag>;
+    /// 
+    /// fn main() {
+    ///     let user_id: UserId = Tagged::from(42);
+    ///     let json = user_id.to_json().unwrap();
+    ///     println!("JSON: {}", json);
+    /// }
+    /// ```
+    pub fn to_json(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string(self.value())
+    }
+
+    /// Serialize a `Tagged` type into a pretty-printed JSON string
+    /// 
+    /// Requires the `serde` feature to be enabled.
+    /// 
+    /// # Errors
+    /// 
+    /// Returns a `serde_json::Error` if the value cannot be serialized to JSON
+    /// 
+    /// # Example
+    /// 
+    /// ```rust,no_run
+    /// use tagged_core::Tagged;
+    /// use serde::Serialize;
+    /// 
+    /// #[derive(Debug, Serialize)]
+    /// struct UserIdTag;
+    /// 
+    /// type UserId = Tagged<u32, UserIdTag>;
+    /// 
+    /// fn main() {
+    ///     let user_id: UserId = Tagged::from(42);
+    ///     let json = user_id.to_json_pretty().unwrap();
+    ///     println!("JSON: {}", json);
+    /// }
+    /// ```
+    pub fn to_json_pretty(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string_pretty(self.value())
+    }
+}
+
 impl<T, Tag> Deref for Tagged<T, Tag> {
     type Target = T;
 
