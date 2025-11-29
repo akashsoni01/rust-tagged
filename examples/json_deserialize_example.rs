@@ -1,98 +1,258 @@
 use rust_tagged::{Tagged, Taggable};
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
 // Define tag types
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct UserIdTag;
+struct UserTag;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct EmailTag;
+struct OrderTag;
+
+// Composite key struct (subset of fields)
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+struct CompositeKeyStruct {
+    id1: u32,
+    id2: String,
+    id3: String,
+}
+
+// Full struct A with composite key and additional fields
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+struct A {
+    id1: u32,
+    id2: String,
+    id3: String,
+    field2: String,
+    field3: Option<i32>,
+    field4: bool,
+}
 
 // Create tagged type aliases
-type UserId = Tagged<u32, UserIdTag>;
-type Email = Tagged<String, EmailTag>;
+type UserCompositeKey = Tagged<CompositeKeyStruct, UserTag>;
+type UserA = Tagged<A, UserTag>;
+type OrderCompositeKey = Tagged<CompositeKeyStruct, OrderTag>;
+type OrderA = Tagged<A, OrderTag>;
 
-// Example struct with Tagged fields
-#[derive(Debug, Deserialize)]
-struct User {
-    id: UserId,
-    email: Email,
-    name: String,
-    age: Option<u32>,
+impl A {
+    /// Extract composite key from struct A
+    fn composite_key(&self) -> CompositeKeyStruct {
+        CompositeKeyStruct {
+            id1: self.id1,
+            id2: self.id2.clone(),
+            id3: self.id3.clone(),
+        }
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    println!("=== JSON Deserialization Example ===\n");
+    println!("=== JSON Serialization & Deserialization with Composite Keys ===\n");
 
-    // Example 1: Deserialize a simple Tagged type from JSON
-    println!("=== Example 1: Simple Tagged Type ===");
-    let json = "42";
-    let user_id: UserId = Tagged::from_json(json)?;
-    println!("  JSON: {}", json);
-    println!("  Deserialized UserId: {}", user_id.value());
-
-    // Example 2: Deserialize a Tagged String from JSON
-    println!("\n=== Example 2: Tagged String ===");
-    let json = "\"user@example.com\"";
-    let email: Email = Tagged::from_json(json)?;
-    println!("  JSON: {}", json);
-    println!("  Deserialized Email: {}", email.value());
-
-    // Example 3: Deserialize a struct containing Tagged fields
-    println!("\n=== Example 3: Struct with Tagged Fields ===");
-    let json = r#"{
-        "id": 123,
-        "email": "alice@example.com",
-        "name": "Alice Johnson",
-        "age": 28
+    // Same JSON string that represents struct A
+    let json_string = r#"{
+        "id1": 123,
+        "id2": "org-456",
+        "id3": "dept-789",
+        "field2": "Additional Data",
+        "field3": 42,
+        "field4": true
     }"#;
+
+    println!("=== Same JSON String ===");
+    println!("{}", json_string);
+
+    // Example 1: Serialize Tagged<A> to JSON
+    println!("\n=== Example 1: Serialize Tagged<A> to JSON ===");
+    let struct_a = A {
+        id1: 123,
+        id2: "org-456".to_string(),
+        id3: "dept-789".to_string(),
+        field2: "Additional Data".to_string(),
+        field3: Some(42),
+        field4: true,
+    };
     
-    let user: User = serde_json::from_str(json)?;
-    println!("  JSON: {}", json);
-    println!("  Deserialized User:");
-    println!("    ID: {} (type: {})", user.id.value(), user.id.type_name());
-    println!("    Email: {} (type: {})", user.email.value(), user.email.type_name());
-    println!("    Name: {}", user.name);
-    println!("    Age: {:?}", user.age);
+    let user_a: UserA = Tagged::from(struct_a);
+    
+    // Serialize using to_json
+    let json = user_a.to_json()?;
+    println!("  Serialized (compact): {}", json);
+    
+    // Serialize using to_json_pretty
+    let json_pretty = user_a.to_json_pretty()?;
+    println!("  Serialized (pretty):");
+    println!("{}", json_pretty);
 
-    // Example 4: Using from_json_string method
-    println!("\n=== Example 4: Using from_json_string ===");
-    let json_string = String::from("999");
-    let user_id: UserId = Tagged::from_json_string(json_string)?;
-    println!("  Deserialized UserId: {}", user_id.value());
+    // Example 2: Serialize Tagged<CompositeKey> to JSON
+    println!("\n=== Example 2: Serialize Tagged<CompositeKey> to JSON ===");
+    let composite_key = CompositeKeyStruct {
+        id1: 123,
+        id2: "org-456".to_string(),
+        id3: "dept-789".to_string(),
+    };
+    
+    let user_composite_key: UserCompositeKey = Tagged::from(composite_key);
+    
+    // Serialize using to_json
+    let json = user_composite_key.to_json()?;
+    println!("  Serialized (compact): {}", json);
+    
+    // Serialize using to_json_pretty
+    let json_pretty = user_composite_key.to_json_pretty()?;
+    println!("  Serialized (pretty):");
+    println!("{}", json_pretty);
 
-    // Example 5: Error handling
-    println!("\n=== Example 5: Error Handling ===");
-    let invalid_json = "not a number";
-    match Tagged::<u32, UserIdTag>::from_json(invalid_json) {
-        Ok(id) => println!("  Success: {}", id.value()),
+    // Example 3: Deserialize same JSON into Tagged<A>
+    println!("\n=== Example 3: Deserialize JSON into Tagged<A> ===");
+    let user_a_deserialized: UserA = Tagged::from_json(json_string)?;
+    
+    println!("  Deserialized UserA:");
+    println!("    id1: {}", user_a_deserialized.value().id1);
+    println!("    id2: {}", user_a_deserialized.value().id2);
+    println!("    id3: {}", user_a_deserialized.value().id3);
+    println!("    field2: {}", user_a_deserialized.value().field2);
+    println!("    field3: {:?}", user_a_deserialized.value().field3);
+    println!("    field4: {}", user_a_deserialized.value().field4);
+    
+    assert_eq!(user_a.value().id1, user_a_deserialized.value().id1);
+    assert_eq!(user_a.value().id2, user_a_deserialized.value().id2);
+    assert_eq!(user_a.value().id3, user_a_deserialized.value().id3);
+    println!("  ✓ Deserialization successful!");
+
+    // Example 4: Deserialize same JSON into Tagged<CompositeKey>
+    println!("\n=== Example 4: Deserialize Same JSON into Tagged<CompositeKey> ===");
+    let user_composite_key_deserialized: UserCompositeKey = Tagged::from_json(json_string)?;
+    
+    println!("  Deserialized UserCompositeKey:");
+    println!("    id1: {}", user_composite_key_deserialized.value().id1);
+    println!("    id2: {}", user_composite_key_deserialized.value().id2);
+    println!("    id3: {}", user_composite_key_deserialized.value().id3);
+    
+    // Verify the composite key matches
+    let extracted_key = user_a_deserialized.value().composite_key();
+    assert_eq!(*user_composite_key_deserialized.value(), extracted_key);
+    println!("  ✓ Composite key matches the extracted key from struct A");
+
+    // Example 5: Round-trip Serialization (Serialize -> Deserialize)
+    println!("\n=== Example 5: Round-trip Serialization ===");
+    
+    // Start with Tagged<A>
+    let original_a: UserA = Tagged::from(A {
+        id1: 999,
+        id2: "org-999".to_string(),
+        id3: "dept-999".to_string(),
+        field2: "Round Trip Test".to_string(),
+        field3: Some(100),
+        field4: false,
+    });
+    
+    // Serialize
+    let json = original_a.to_json()?;
+    println!("  Serialized: {}", json);
+    
+    // Deserialize back
+    let round_trip_a: UserA = Tagged::from_json(&json)?;
+    
+    assert_eq!(original_a.value().id1, round_trip_a.value().id1);
+    assert_eq!(original_a.value().id2, round_trip_a.value().id2);
+    assert_eq!(original_a.value().id3, round_trip_a.value().id3);
+    assert_eq!(original_a.value().field2, round_trip_a.value().field2);
+    assert_eq!(original_a.value().field3, round_trip_a.value().field3);
+    assert_eq!(original_a.value().field4, round_trip_a.value().field4);
+    
+    println!("  ✓ Round-trip successful! All fields match");
+
+    // Example 6: Round-trip with CompositeKey
+    println!("\n=== Example 6: Round-trip with CompositeKey ===");
+    
+    let original_key: UserCompositeKey = Tagged::from(CompositeKeyStruct {
+        id1: 555,
+        id2: "org-555".to_string(),
+        id3: "dept-555".to_string(),
+    });
+    
+    // Serialize
+    let json = original_key.to_json()?;
+    println!("  Serialized: {}", json);
+    
+    // Deserialize back
+    let round_trip_key: UserCompositeKey = Tagged::from_json(&json)?;
+    
+    assert_eq!(original_key.value().id1, round_trip_key.value().id1);
+    assert_eq!(original_key.value().id2, round_trip_key.value().id2);
+    assert_eq!(original_key.value().id3, round_trip_key.value().id3);
+    
+    println!("  ✓ Round-trip successful! All composite key fields match");
+
+    // Example 7: Using from_json_string
+    println!("\n=== Example 7: Using from_json_string ===");
+    let json_string_owned = json_string.to_string();
+    
+    let user_a_from_string: UserA = Tagged::from_json_string(json_string_owned.clone())?;
+    let composite_key_from_string: UserCompositeKey = Tagged::from_json_string(json_string_owned)?;
+    
+    println!("  Deserialized from String:");
+    println!("    UserA id1: {}", user_a_from_string.value().id1);
+    println!("    CompositeKey id1: {}", composite_key_from_string.value().id1);
+    assert_eq!(user_a_deserialized.value().id1, user_a_from_string.value().id1);
+    assert_eq!(user_composite_key_deserialized.value().id1, composite_key_from_string.value().id1);
+    println!("  ✓ Results match deserialization from &str");
+
+    // Example 8: Type safety with different tags
+    println!("\n=== Example 8: Type Safety with Different Tags ===");
+    
+    // Deserialize into OrderTag types
+    let order_a: OrderA = Tagged::from_json(json_string)?;
+    let order_composite_key: OrderCompositeKey = Tagged::from_json(json_string)?;
+    
+    println!("  UserA id1: {} (type: {})", user_a_deserialized.value().id1, user_a_deserialized.type_name());
+    println!("  OrderA id1: {} (type: {})", order_a.value().id1, order_a.type_name());
+    println!("  UserCompositeKey id1: {} (type: {})", user_composite_key_deserialized.value().id1, user_composite_key_deserialized.type_name());
+    println!("  OrderCompositeKey id1: {} (type: {})", order_composite_key.value().id1, order_composite_key.type_name());
+    
+    // Type safety: These are different types even with same data
+    println!("  ✓ UserA and OrderA are distinct types");
+    println!("  ✓ UserCompositeKey and OrderCompositeKey are distinct types");
+    
+    // This would cause a compile error if uncommented:
+    // let invalid: OrderA = user_a_deserialized; // Error: cannot assign UserA to OrderA
+    // let invalid: OrderCompositeKey = user_composite_key_deserialized; // Error: type mismatch
+
+    // Example 9: Extract composite key from struct A
+    println!("\n=== Example 9: Extract Composite Key from Struct A ===");
+    let extracted_composite_key = user_a_deserialized.value().composite_key();
+    let tagged_extracted: UserCompositeKey = Tagged::from(extracted_composite_key);
+    
+    println!("  Extracted CompositeKey:");
+    println!("    id1: {}", tagged_extracted.value().id1);
+    println!("    id2: {}", tagged_extracted.value().id2);
+    println!("    id3: {}", tagged_extracted.value().id3);
+    assert_eq!(user_composite_key_deserialized, tagged_extracted);
+    println!("  ✓ Extracted key matches deserialized composite key");
+
+    // Example 10: Error handling
+    println!("\n=== Example 10: Error Handling ===");
+    let invalid_json = "not valid json";
+    match UserA::from_json(invalid_json) {
+        Ok(a) => println!("  Success: {:?}", a),
+        Err(e) => println!("  Error (expected): {}", e),
+    }
+    
+    match UserCompositeKey::from_json(invalid_json) {
+        Ok(key) => println!("  Success: {:?}", key),
         Err(e) => println!("  Error (expected): {}", e),
     }
 
-    // Example 6: Type safety demonstration
-    println!("\n=== Example 6: Type Safety ===");
-    let user_id_json = "42";
-    let email_json = "\"test@example.com\"";
-    
-    let user_id: UserId = Tagged::from_json(user_id_json)?;
-    let email: Email = Tagged::from_json(email_json)?;
-    
-    println!("  UserId: {} (type: {})", user_id.value(), user_id.type_name());
-    println!("  Email: {} (type: {})", email.value(), email.type_name());
-    
-    // This would cause a compile error if uncommented:
-    // let invalid: Email = Tagged::from_json(user_id_json)?; // Error: type mismatch
-    
-    println!("✓ Type safety preserved: UserId and Email are distinct types");
-
     println!("\n=== Example completed successfully! ===");
     println!("This example demonstrates:");
-    println!("1. Deserializing JSON strings into Tagged types");
-    println!("2. Using from_json() for &str");
-    println!("3. Using from_json_string() for String");
-    println!("4. Deserializing structs containing Tagged fields");
-    println!("5. Error handling for invalid JSON");
-    println!("6. Type safety with Tagged types");
+    println!("1. Serializing Tagged<A> to JSON (to_json, to_json_pretty)");
+    println!("2. Serializing Tagged<CompositeKey> to JSON");
+    println!("3. Deserializing same JSON into Tagged<A> and Tagged<CompositeKey>");
+    println!("4. CompositeKey is a subset of A's fields");
+    println!("5. Round-trip serialization for both types");
+    println!("6. Using from_json_string() method");
+    println!("7. Type safety with different tags (UserTag vs OrderTag)");
+    println!("8. Extracting composite key from full struct");
+    println!("9. Error handling for invalid JSON");
+    println!("10. Real-world use case: Same JSON for full entity and composite key lookups");
 
     Ok(())
 }
-

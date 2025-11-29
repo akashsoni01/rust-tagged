@@ -185,7 +185,13 @@ where
     pub fn from_json_string(json: String) -> Result<Self, serde_json::Error> {
         serde_json::from_str(&json).map(Self::new)
     }
+}
 
+#[cfg(feature = "serde")]
+impl<T, Tag> Tagged<T, Tag>
+where
+    T: serde::Serialize,
+{
     /// Serialize a `Tagged` type into a JSON string
     /// 
     /// Requires the `serde` feature to be enabled.
