@@ -76,6 +76,35 @@ impl<T, Tag> Tagged<T, Tag> {
         }
     }
 
+    /// ⚠️ **WARNING**: Avoid using `.value()` as it breaks type safety!
+    /// 
+    /// Using `.value()` extracts the inner value, which defeats the purpose of `Tagged` types.
+    /// Instead, prefer:
+    /// - Using `Deref` coercion: `let raw: &T = &*tagged;`
+    /// - Using `Into` conversion: `let raw: T = tagged.into();`
+    /// - Keeping values as `Tagged` types throughout your codebase
+    /// 
+    /// # Example (Avoid)
+    /// ```rust,no_run
+    /// # use tagged_core::Tagged;
+    /// # struct UserIdTag;
+    /// # type UserId = Tagged<u32, UserIdTag>;
+    /// let user_id: UserId = 42.into();
+    /// let raw = user_id.value(); // ⚠️ Breaks type safety!
+    /// ```
+    /// 
+    /// # Example (Preferred)
+    /// ```rust,no_run
+    /// # use tagged_core::Tagged;
+    /// # struct UserIdTag;
+    /// # type UserId = Tagged<u32, UserIdTag>;
+    /// let user_id: UserId = 42.into();
+    /// let raw: u32 = user_id.into(); // ✓ Maintains type safety through conversion
+    /// ```
+    #[deprecated(
+        since = "0.8.0",
+        note = "Using .value() breaks type safety. Prefer Deref coercion (&*tagged) or Into conversion (tagged.into()) instead."
+    )]
     pub fn value(&self) -> &T {
         &self.value
     }
@@ -218,7 +247,7 @@ where
     /// }
     /// ```
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(self.value())
+        serde_json::to_string(&**self)
     }
 
     /// Serialize a `Tagged` type into a pretty-printed JSON string
@@ -247,7 +276,7 @@ where
     /// }
     /// ```
     pub fn to_json_pretty(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string_pretty(self.value())
+        serde_json::to_string_pretty(&**self)
     }
 }
 
@@ -386,7 +415,7 @@ use serde::{Serialize, Deserialize, Serializer, Deserializer};
 #[cfg(feature = "serde")]
 impl<T: Serialize, Tag> Serialize for Tagged<T, Tag> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.value().serialize(serializer)
+        (&**self).serialize(serializer)
     }
 }
 
