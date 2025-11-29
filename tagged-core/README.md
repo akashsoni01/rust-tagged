@@ -1,4 +1,4 @@
-# rust-tagged (v0.4.0)
+# rust-tagged
 
 > A lightweight, extensible system for creating type-safe IDs, email addresses, and domain-specific values using Rust's type system.
 

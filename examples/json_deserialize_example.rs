@@ -1,5 +1,6 @@
 use rust_tagged::{Tagged, Taggable};
 use serde::{Serialize, Deserialize};
+// cargo check --example json_deserialize_example --features serde
 
 // Define tag types
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

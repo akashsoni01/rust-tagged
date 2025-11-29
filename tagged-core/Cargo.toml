@@ -1,6 +1,6 @@
 [package]
 name = "tagged-core"
-version = "0.9.0"
+version = "1.0.0"
 edition = "2024"
 description = "A lightweight tagged type abstraction for type-safe IDs, etc."
 license = "MPL-2.0"
@@ -11,15 +11,14 @@ documentation = "https://docs.rs/rust-tagged"
 keywords = ["tagged", "id", "type-safe", "newtype", "tagged-union"]
 categories = ["data-structures"]
 readme = "../README.md"
-exclude = [
-    "examples/**/*",
-    "tests/**/*",
-    "benches/**/*",
-    "README.md",
-    ".DS_Store",
-    ".idea/**/*",
-    "**/*_test.rs",
-    "**/*_tests.rs",
+autobins = true
+autoexamples = false
+autobenches = false
+include = [
+    "Cargo.toml",
+    "src/**/*",
+    "../README.md",
+    "../LICENSE",
 ]
 
 [dependencies]
