@@ -58,14 +58,17 @@ pub struct Tagged<T, Tag> {
 /// }
 /// ```
 pub trait Taggable {
-    /// Get the inner value type name for debugging
-    fn type_name(&self) -> &'static str;
+    type Inner;
+    type Tag;
+
+    fn type_name(&self) -> &'static str {
+        std::any::type_name::<Self::Inner>()
+    }
 }
 
 impl<T, Tag> Taggable for Tagged<T, Tag> {
-    fn type_name(&self) -> &'static str {
-        std::any::type_name::<T>()
-    }
+    type Inner = T;
+    type Tag = Tag;
 }
 
 impl<T, Tag> Tagged<T, Tag> {
