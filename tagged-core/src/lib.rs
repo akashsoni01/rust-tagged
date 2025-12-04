@@ -71,6 +71,13 @@ impl<T, Tag> Taggable for Tagged<T, Tag> {
     type Tag = Tag;
 }
 
+impl<T: Default, Tag> Default for Tagged<T, Tag> {
+    fn default() -> Self {
+        Self { value: Default::default(), _marker: Default::default() }
+    }
+}
+
+
 impl<T, Tag> Tagged<T, Tag> {
     pub fn new(value: T) -> Self {
         Self {

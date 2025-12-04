@@ -94,7 +94,7 @@ impl Product {
 
 impl Order {
     fn new(user_id: UserId, product_id: ProductId, quantity: i32, unit_price: Price) -> Self {
-        let total_price = Price::from(unit_price.value() * quantity);
+        let total_price = Price::from(*unit_price * quantity);
         Self {
             id: OrderId::from(Uuid::new_v4()),
             user_id,
@@ -227,9 +227,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .query(
             "INSERT INTO ecommerce.users (id, name, email, age, is_active, created_at, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
-                user.id.value(),
+                &*user.id,
                 &user.name,
-                user.email.value(),
+                &*user.email,
                 user.age,
                 user.is_active,
                 user.created_at,
@@ -245,10 +245,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .query(
             "INSERT INTO ecommerce.products (id, name, description, price, category, in_stock, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                product.id.value(),
+                &*product.id,
                 &product.name,
                 product.description.as_ref(),
-                product.price.value(),
+                &*product.price,
                 &product.category,
                 product.in_stock,
                 product.tags.as_ref(),
@@ -264,11 +264,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .query(
             "INSERT INTO ecommerce.orders (id, user_id, product_id, quantity, total_price, status, order_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                order.id.value(),
-                order.user_id.value(),
-                order.product_id.value(),
+                &*order.id,
+                &*order.user_id,
+                &*order.product_id,
                 order.quantity,
-                order.total_price.value(),
+                &*order.total_price,
                 &order.status,
                 order.order_date,
                 order.notes.as_ref(),
@@ -289,8 +289,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for row in user_rows.into_typed::<User>() {
         let fetched_user = row?;
         println!("Fetched user: {:?}", fetched_user);
-        println!("  User ID: {}", fetched_user.id.value());
-        println!("  Email: {}", fetched_user.email.value());
+        println!("  User ID: {}", &*fetched_user.id);
+        println!("  Email: {}", &*fetched_user.email);
         println!("  Age: {:?}", fetched_user.age);
         println!();
     }
@@ -306,8 +306,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for row in product_rows.into_typed::<Product>() {
         let fetched_product = row?;
         println!("Fetched product: {:?}", fetched_product);
-        println!("  Product ID: {}", fetched_product.id.value());
-        println!("  Price: ${:.2}", *fetched_product.price.value() as f64 / 100.0);
+        println!("  Product ID: {}", &*fetched_product.id);
+        println!("  Price: ${:.2}", *fetched_product.price as f64 / 100.0);
         println!("  Category: {}", fetched_product.category);
         println!();
     }
@@ -323,10 +323,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for row in order_rows.into_typed::<Order>() {
         let fetched_order = row?;
         println!("Fetched order: {:?}", fetched_order);
-        println!("  Order ID: {}", fetched_order.id.value());
-        println!("  User ID: {}", fetched_order.user_id.value());
-        println!("  Product ID: {}", fetched_order.product_id.value());
-        println!("  Total: ${:.2}", *fetched_order.total_price.value() as f64 / 100.0);
+        println!("  Order ID: {}", &*fetched_order.id);
+        println!("  User ID: {}", &*fetched_order.user_id);
+        println!("  Product ID: {}", &*fetched_order.product_id);
+        println!("  Total: ${:.2}", *fetched_order.total_price as f64 / 100.0);
         println!();
     }
 
@@ -348,7 +348,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let user_rows = session
             .query(
                 "SELECT id, name, email, age, is_active, created_at, metadata FROM ecommerce.users WHERE id = ?",
-                (order.user_id.value(),)
+                (&*order.user_id,)
             )
             .await?
             .rows
@@ -357,8 +357,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for user_row in user_rows.into_typed::<User>() {
             let user = user_row?;
             println!("User: {} ({}) - Order: {} - Total: ${:.2} - Status: {}", 
-                     user.name, user.email.value(), order.id.value(), 
-                     *order.total_price.value() as f64 / 100.0, order.status);
+                     user.name, &*user.email, &*order.id, 
+                     *order.total_price as f64 / 100.0, order.status);
         }
     }
 
@@ -367,7 +367,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     session
         .query(
             "UPDATE ecommerce.orders SET status = ? WHERE id = ?",
-            ("completed", order.id.value())
+            ("completed", &*order.id)
         )
         .await?;
 
@@ -377,7 +377,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let updated_order_rows = session
         .query(
             "SELECT id, user_id, product_id, quantity, total_price, status, order_date, notes FROM ecommerce.orders WHERE id = ?",
-            (order.id.value(),)
+            (&*order.id,)
         )
         .await?
         .rows
@@ -399,8 +399,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let product_id_from_uuid: ProductId = Uuid::new_v4().into();
     
     println!("✓ Type safety preserved: UserId and ProductId are distinct types");
-    println!("  UserId: {}", user_id_from_uuid.value());
-    println!("  ProductId: {}", product_id_from_uuid.value());
+    println!("  UserId: {}", &*user_id_from_uuid);
+    println!("  ProductId: {}", &*product_id_from_uuid);
 
     // Demonstrate Taggable trait enforcement
     println!("\n=== Taggable Trait Enforcement ===");

@@ -116,9 +116,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let email_from_string: Email = "test@example.com".into();
     
     println!("✓ Type safety preserved: UserId and ProductId are distinct types");
-    println!("  UserId: {}", user_id_from_uuid.value());
-    println!("  ProductId: {}", product_id_from_uuid.value());
-    println!("  Email: {}", email_from_string.value());
+    println!("  UserId: {}", &*user_id_from_uuid);
+    println!("  ProductId: {}", &*product_id_from_uuid);
+    println!("  Email: {}", &*email_from_string);
 
     // Demonstrate Taggable trait enforcement
     println!("\n=== Taggable Trait Enforcement ===");
@@ -147,8 +147,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n=== Deserialization Demonstration ===");
     let deserialized_user: User = serde_json::from_str(&user_json)?;
     println!("Deserialized user: {:?}", deserialized_user);
-    println!("  User ID: {}", deserialized_user.id.value());
-    println!("  Email: {}", deserialized_user.email.value());
+    println!("  User ID: {}", &*deserialized_user.id);
+    println!("  Email: {}", &*deserialized_user.email);
 
     // Demonstrate FromRow derive compatibility
     println!("\n=== FromRow Derive Compatibility ===");
@@ -167,9 +167,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("\n=== Example CQL Queries ===");
     println!("INSERT INTO users (id, name, email, age, is_active, created_at, metadata) VALUES (?, ?, ?, ?, ?, ?, ?)");
     println!("  Parameters: ({}, {}, {}, {:?}, {}, {}, {:?})", 
-             user.id.value(), 
+             &*user.id, 
              user.name, 
-             user.email.value(), 
+             &*user.email, 
              user.age, 
              user.is_active, 
              user.created_at, 
@@ -177,10 +177,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\nINSERT INTO products (id, name, description, price, category, in_stock, tags, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     println!("  Parameters: ({}, {}, {:?}, {}, {}, {}, {:?}, {})", 
-             product.id.value(), 
+             &*product.id, 
              product.name, 
              product.description, 
-             product.price.value(), 
+             &*product.price, 
              product.category, 
              product.in_stock, 
              product.tags, 

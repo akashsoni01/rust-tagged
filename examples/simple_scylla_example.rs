@@ -99,9 +99,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .query(
             "INSERT INTO demo.users (id, name, email, age) VALUES (?, ?, ?, ?)",
             (
-                user.id.value(),
+                &*user.id,
                 &user.name,
-                user.email.value(),
+                &*user.email,
                 user.age,
             ),
         )
@@ -120,8 +120,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     for row in user_rows.into_typed::<User>() {
         let fetched_user = row?;
         println!("Fetched user: {:?}", fetched_user);
-        println!("  User ID: {}", fetched_user.id.value());
-        println!("  Email: {}", fetched_user.email.value());
+        println!("  User ID: {}", &*fetched_user.id);
+        println!("  Email: {}", &*fetched_user.email);
         println!("  Age: {:?}", fetched_user.age);
         println!();
     }
@@ -137,8 +137,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let email_from_string: Email = "test@example.com".into();
     
     println!("✓ Type safety preserved: UserId and Email are distinct types");
-    println!("  UserId: {}", user_id_from_uuid.value());
-    println!("  Email: {}", email_from_string.value());
+    println!("  UserId: {}", &*user_id_from_uuid);
+    println!("  Email: {}", &*email_from_string);
 
     // Demonstrate Taggable trait enforcement
     println!("\n=== Taggable Trait Enforcement ===");

@@ -106,16 +106,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user_a_deserialized: UserA = Tagged::from_json(json_string)?;
     
     println!("  Deserialized UserA:");
-    println!("    id1: {}", user_a_deserialized.value().id1);
-    println!("    id2: {}", user_a_deserialized.value().id2);
-    println!("    id3: {}", user_a_deserialized.value().id3);
-    println!("    field2: {}", user_a_deserialized.value().field2);
-    println!("    field3: {:?}", user_a_deserialized.value().field3);
-    println!("    field4: {}", user_a_deserialized.value().field4);
+    println!("    id1: {}", user_a_deserialized.id1);
+    println!("    id2: {}", user_a_deserialized.id2);
+    println!("    id3: {}", user_a_deserialized.id3);
+    println!("    field2: {}", user_a_deserialized.field2);
+    println!("    field3: {:?}", user_a_deserialized.field3);
+    println!("    field4: {}", user_a_deserialized.field4);
     
-    assert_eq!(user_a.value().id1, user_a_deserialized.value().id1);
-    assert_eq!(user_a.value().id2, user_a_deserialized.value().id2);
-    assert_eq!(user_a.value().id3, user_a_deserialized.value().id3);
+    assert_eq!(user_a.id1, user_a_deserialized.id1);
+    assert_eq!(user_a.id2, user_a_deserialized.id2);
+    assert_eq!(user_a.id3, user_a_deserialized.id3);
     println!("  ✓ Deserialization successful!");
 
     // Example 4: Deserialize same JSON into Tagged<CompositeKey>
@@ -123,13 +123,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user_composite_key_deserialized: UserCompositeKey = Tagged::from_json(json_string)?;
     
     println!("  Deserialized UserCompositeKey:");
-    println!("    id1: {}", user_composite_key_deserialized.value().id1);
-    println!("    id2: {}", user_composite_key_deserialized.value().id2);
-    println!("    id3: {}", user_composite_key_deserialized.value().id3);
+    println!("    id1: {}", user_composite_key_deserialized.id1);
+    println!("    id2: {}", user_composite_key_deserialized.id2);
+    println!("    id3: {}", user_composite_key_deserialized.id3);
     
     // Verify the composite key matches
-    let extracted_key = user_a_deserialized.value().composite_key();
-    assert_eq!(*user_composite_key_deserialized.value(), extracted_key);
+    let extracted_key = user_a_deserialized.composite_key();
+    assert_eq!(*user_composite_key_deserialized, extracted_key);
     println!("  ✓ Composite key matches the extracted key from struct A");
 
     // Example 5: Round-trip Serialization (Serialize -> Deserialize)
@@ -152,12 +152,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Deserialize back
     let round_trip_a: UserA = Tagged::from_json(&json)?;
     
-    assert_eq!(original_a.value().id1, round_trip_a.value().id1);
-    assert_eq!(original_a.value().id2, round_trip_a.value().id2);
-    assert_eq!(original_a.value().id3, round_trip_a.value().id3);
-    assert_eq!(original_a.value().field2, round_trip_a.value().field2);
-    assert_eq!(original_a.value().field3, round_trip_a.value().field3);
-    assert_eq!(original_a.value().field4, round_trip_a.value().field4);
+    assert_eq!(original_a.id1, round_trip_a.id1);
+    assert_eq!(original_a.id2, round_trip_a.id2);
+    assert_eq!(original_a.id3, round_trip_a.id3);
+    assert_eq!(original_a.field2, round_trip_a.field2);
+    assert_eq!(original_a.field3, round_trip_a.field3);
+    assert_eq!(original_a.field4, round_trip_a.field4);
     
     println!("  ✓ Round-trip successful! All fields match");
 
@@ -177,9 +177,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Deserialize back
     let round_trip_key: UserCompositeKey = Tagged::from_json(&json)?;
     
-    assert_eq!(original_key.value().id1, round_trip_key.value().id1);
-    assert_eq!(original_key.value().id2, round_trip_key.value().id2);
-    assert_eq!(original_key.value().id3, round_trip_key.value().id3);
+    assert_eq!(original_key.id1, round_trip_key.id1);
+    assert_eq!(original_key.id2, round_trip_key.id2);
+    assert_eq!(original_key.id3, round_trip_key.id3);
     
     println!("  ✓ Round-trip successful! All composite key fields match");
 
@@ -191,10 +191,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let composite_key_from_string: UserCompositeKey = Tagged::from_json_string(json_string_owned)?;
     
     println!("  Deserialized from String:");
-    println!("    UserA id1: {}", user_a_from_string.value().id1);
-    println!("    CompositeKey id1: {}", composite_key_from_string.value().id1);
-    assert_eq!(user_a_deserialized.value().id1, user_a_from_string.value().id1);
-    assert_eq!(user_composite_key_deserialized.value().id1, composite_key_from_string.value().id1);
+    println!("    UserA id1: {}", user_a_from_string.id1);
+    println!("    CompositeKey id1: {}", composite_key_from_string.id1);
+    assert_eq!(user_a_deserialized.id1, user_a_from_string.id1);
+    assert_eq!(user_composite_key_deserialized.id1, composite_key_from_string.id1);
     println!("  ✓ Results match deserialization from &str");
 
     // Example 8: Type safety with different tags
@@ -204,10 +204,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let order_a: OrderA = Tagged::from_json(json_string)?;
     let order_composite_key: OrderCompositeKey = Tagged::from_json(json_string)?;
     
-    println!("  UserA id1: {} (type: {})", user_a_deserialized.value().id1, user_a_deserialized.type_name());
-    println!("  OrderA id1: {} (type: {})", order_a.value().id1, order_a.type_name());
-    println!("  UserCompositeKey id1: {} (type: {})", user_composite_key_deserialized.value().id1, user_composite_key_deserialized.type_name());
-    println!("  OrderCompositeKey id1: {} (type: {})", order_composite_key.value().id1, order_composite_key.type_name());
+    println!("  UserA id1: {} (type: {})", user_a_deserialized.id1, user_a_deserialized.type_name());
+    println!("  OrderA id1: {} (type: {})", order_a.id1, order_a.type_name());
+    println!("  UserCompositeKey id1: {} (type: {})", user_composite_key_deserialized.id1, user_composite_key_deserialized.type_name());
+    println!("  OrderCompositeKey id1: {} (type: {})", order_composite_key.id1, order_composite_key.type_name());
     
     // Type safety: These are different types even with same data
     println!("  ✓ UserA and OrderA are distinct types");
@@ -219,13 +219,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 9: Extract composite key from struct A
     println!("\n=== Example 9: Extract Composite Key from Struct A ===");
-    let extracted_composite_key = user_a_deserialized.value().composite_key();
+    let extracted_composite_key = user_a_deserialized.composite_key();
     let tagged_extracted: UserCompositeKey = Tagged::from(extracted_composite_key);
     
     println!("  Extracted CompositeKey:");
-    println!("    id1: {}", tagged_extracted.value().id1);
-    println!("    id2: {}", tagged_extracted.value().id2);
-    println!("    id3: {}", tagged_extracted.value().id3);
+    println!("    id1: {}", tagged_extracted.id1);
+    println!("    id2: {}", tagged_extracted.id2);
+    println!("    id3: {}", tagged_extracted.id3);
     assert_eq!(user_composite_key_deserialized, tagged_extracted);
     println!("  ✓ Extracted key matches deserialized composite key");
 
