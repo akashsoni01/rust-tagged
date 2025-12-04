@@ -1,6 +1,6 @@
 [package]
 name = "rust-tagged"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 authors = ["Codefonsi <info@codefonsi.com>"]
 license = "MPL-2.0"
@@ -32,7 +32,7 @@ members = [
 tagged-core = { path = "tagged-core" }
 
 [dependencies]
-tagged-core = { path = "tagged-core", version = "1.0.0", features = ["serde"] }
+tagged-core = { path = "tagged-core", version = "1.0.1", features = ["serde"] }
 #tagged-macros = {path = "./tagged-macros"}
 
 [dev-dependencies]
