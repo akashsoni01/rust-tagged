@@ -1,5 +1,3 @@
-use tagged_core::Tagged;
-
 fn main() {
 }
 #[test]

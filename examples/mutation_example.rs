@@ -10,5 +10,5 @@ fn main() {
 
     name.set("New Org Name".into());
 
-    println!("Updated Org Name: {}", name.value());
+    println!("Updated Org Name: {}", &*name);
 }
