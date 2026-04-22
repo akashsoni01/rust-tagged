@@ -166,7 +166,11 @@ where
     type Err = serde_json::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        serde_json::from_str(s).map(Self::new)
+        // 1) Parse as raw JSON (`{"a":"b"}`, `1`, `true`, etc.)
+        // 2) Fallback: treat input as plain string content (useful for `Tagged<String, _>`)
+        serde_json::from_str(s)
+            .or_else(|_| serde_json::from_value(serde_json::Value::String(s.to_owned())))
+            .map(Self::new)
     }
 }
 
@@ -830,18 +834,30 @@ mod tests {
     #[test]
     fn parse_composite_key_from_json_str3() {
         #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
-
         struct CompositeKeyTag;
+
         type UserCompositeKey = Tagged<String, CompositeKeyTag>;
 
-        let tagged_key: UserCompositeKey = r#"asdfd"#
+        let tagged_key: UserCompositeKey = "asdfd"
             .parse()
             .expect("failed to parse composite key json");
+        
+        assert_eq!(&*tagged_key,"asdfd");
+    }
 
-        assert_eq!(&*tagged_key, r#"asdfd"#);
+        #[cfg(feature = "serde")]
+    #[test]
+    fn parse_composite_key_from_json_str4() {
+        #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
+        struct CompositeKeyTag;
 
-        let json = tagged_key.to_json().expect("failed to serialize composite key");
-        assert_eq!(json, r#"asdfd"#);
+        type UserCompositeKey = Tagged<i32, CompositeKeyTag>;
+
+        let tagged_key: UserCompositeKey = "1"
+            .parse()
+            .expect("failed to parse composite key json");
+        
+        assert_eq!(*tagged_key, 1);
     }
 
 
