@@ -804,5 +804,46 @@ mod tests {
         let json = tagged_key.to_json().expect("failed to serialize composite key");
         assert_eq!(json, r#"{"a":"foo","b":"bar"}"#);
     }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn parse_composite_key_from_json_str2() {
+        #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
+        struct CompositeKey {
+            a: String,
+        }
+
+        struct CompositeKeyTag;
+        type UserCompositeKey = Tagged<CompositeKey, CompositeKeyTag>;
+
+        let tagged_key: UserCompositeKey = r#"{"a":"foo"}"#
+            .parse()
+            .expect("failed to parse composite key json");
+
+        assert_eq!(tagged_key.a, "foo");
+
+        let json = tagged_key.to_json().expect("failed to serialize composite key");
+        assert_eq!(json, r#"{"a":"foo"}"#);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn parse_composite_key_from_json_str3() {
+        #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
+
+        struct CompositeKeyTag;
+        type UserCompositeKey = Tagged<String, CompositeKeyTag>;
+
+        let tagged_key: UserCompositeKey = r#"asdfd"#
+            .parse()
+            .expect("failed to parse composite key json");
+
+        assert_eq!(&*tagged_key, r#"asdfd"#);
+
+        let json = tagged_key.to_json().expect("failed to serialize composite key");
+        assert_eq!(json, r#"asdfd"#);
+    }
+
+
 }
 
