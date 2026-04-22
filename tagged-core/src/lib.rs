@@ -144,6 +144,7 @@ impl<Tag> From<&String> for Tagged<String, Tag> {
 }
 
 /// Support `FromStr` so `parse()` works for `Tagged<T, Tag>`
+#[cfg(not(feature = "serde"))]
 impl<T, Tag> FromStr for Tagged<T, Tag>
 where
     T: FromStr,
@@ -152,6 +153,20 @@ where
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         T::from_str(s).map(Self::new)
+    }
+}
+
+/// Support JSON `FromStr` so `parse()` works for composite keys and other
+/// deserializable types when the `serde` feature is enabled.
+#[cfg(feature = "serde")]
+impl<T, Tag> FromStr for Tagged<T, Tag>
+where
+    T: serde::de::DeserializeOwned,
+{
+    type Err = serde_json::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_json::from_str(s).map(Self::new)
     }
 }
 
@@ -765,6 +780,29 @@ mod tests {
 
         let user_id: UserId = "42".parse().expect("failed to parse tagged value");
         assert_eq!(user_id.value, 42);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn parse_composite_key_from_json_str() {
+        #[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq, Debug)]
+        struct CompositeKey {
+            a: String,
+            b: String,
+        }
+
+        struct CompositeKeyTag;
+        type UserCompositeKey = Tagged<CompositeKey, CompositeKeyTag>;
+
+        let tagged_key: UserCompositeKey = r#"{"a":"foo","b":"bar"}"#
+            .parse()
+            .expect("failed to parse composite key json");
+
+        assert_eq!(tagged_key.a, "foo");
+        assert_eq!(tagged_key.b, "bar");
+
+        let json = tagged_key.to_json().expect("failed to serialize composite key");
+        assert_eq!(json, r#"{"a":"foo","b":"bar"}"#);
     }
 }
 
