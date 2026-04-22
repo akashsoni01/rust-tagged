@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::ops::Deref;
 use std::hash::{Hash, Hasher};
+use std::str::FromStr;
 
 /// rust-tagged provides a simple way to define strongly typed wrappers over primitive types like String, i32, Uuid, chrono::DateTime, etc. It helps eliminate bugs caused by misusing raw primitives for conceptually distinct fields such as UserId, Email, ProductId, and more.
 /// 
@@ -139,6 +140,18 @@ impl<Tag> From<&str> for Tagged<String, Tag> {
 impl<Tag> From<&String> for Tagged<String, Tag> {
     fn from(s: &String) -> Self {
         Tagged::new(s.clone())
+    }
+}
+
+/// Support `FromStr` so `parse()` works for `Tagged<T, Tag>`
+impl<T, Tag> FromStr for Tagged<T, Tag>
+where
+    T: FromStr,
+{
+    type Err = T::Err;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        T::from_str(s).map(Self::new)
     }
 }
 
@@ -743,6 +756,15 @@ mod tests {
         // tagged_strut.id = 3; //
 
         assert_eq!(tagged_struct.id.value, 0);
+    }
+
+    #[test]
+    fn parse_tagged_from_str() {
+        struct UserIdTag;
+        type UserId = Tagged<u32, UserIdTag>;
+
+        let user_id: UserId = "42".parse().expect("failed to parse tagged value");
+        assert_eq!(user_id.value, 42);
     }
 }
 
