@@ -8,7 +8,7 @@ use std::str::FromStr;
 /// 
 /// Eliminate accidental mixups between similar types (e.g. OrgId vs UserId)
 /// Enforce domain modeling in code via the type system
-/// Ergonomic .into() support for primitive conversions
+/// Ergonomic conversion into tagged types and deref access to inner values
 ///
 /// # Example - Simple 
 ///
@@ -22,10 +22,10 @@ use std::str::FromStr;
 ///
 /// fn main() {
 ///     let email: Email = "test@example.com".into();
-///     println!("Email inner value: {}", email.value());
+///     println!("Email inner value: {}", &*email);
 ///
 ///     // Convert back to String
-///     let raw: String = email.into();
+///     let raw: String = (*email).clone();
 ///     println!("Raw String: {raw}");
 /// }
 /// ```
@@ -47,7 +47,7 @@ pub struct Tagged<T, Tag> {
 /// struct UserIdTag;
 /// type UserId = Tagged<u32, UserIdTag>;
 ///
-/// fn process_user_id<T: Taggable>(id: T) {
+/// fn process_user_id<T: Taggable + std::fmt::Debug>(id: T) {
 ///     // This function only accepts Tagged types, not raw u32
 ///     println!("Processing user ID: {:?}", id);
 /// }
@@ -92,7 +92,7 @@ impl<T, Tag> Tagged<T, Tag> {
     /// Using `.value()` extracts the inner value, which defeats the purpose of `Tagged` types.
     /// Instead, prefer:
     /// - Using `Deref` coercion: `let raw: &T = &*tagged;`
-    /// - Using `Into` conversion: `let raw: T = tagged.into();`
+    /// - Using `Deref` for access: `let raw: &T = &*tagged;`
     /// - Keeping values as `Tagged` types throughout your codebase
     /// 
     /// # Example (Avoid)
@@ -110,11 +110,11 @@ impl<T, Tag> Tagged<T, Tag> {
     /// # struct UserIdTag;
     /// # type UserId = Tagged<u32, UserIdTag>;
     /// let user_id: UserId = 42.into();
-    /// let raw: u32 = user_id.into(); // ✓ Maintains type safety through conversion
+    /// let raw: u32 = *user_id; // ✓ Maintains type safety through deref access
     /// ```
     #[deprecated(
         since = "0.8.0",
-        note = "Using .value() breaks type safety. Prefer Deref coercion (&*tagged) or Into conversion (tagged.into()) instead."
+        note = "Using .value() breaks type safety. Prefer Deref coercion (&*tagged) instead."
     )]
     pub fn value(&self) -> &T {
         &self.value
