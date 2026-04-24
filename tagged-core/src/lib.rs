@@ -87,38 +87,6 @@ impl<T, Tag> Tagged<T, Tag> {
         }
     }
 
-    /// ⚠️ **WARNING**: Avoid using `.value()` as it breaks type safety!
-    /// 
-    /// Using `.value()` extracts the inner value, which defeats the purpose of `Tagged` types.
-    /// Instead, prefer:
-    /// - Using `Deref` coercion: `let raw: &T = &*tagged;`
-    /// - Using `Deref` for access: `let raw: &T = &*tagged;`
-    /// - Keeping values as `Tagged` types throughout your codebase
-    /// 
-    /// # Example (Avoid)
-    /// ```rust,no_run
-    /// # use tagged_core::Tagged;
-    /// # struct UserIdTag;
-    /// # type UserId = Tagged<u32, UserIdTag>;
-    /// let user_id: UserId = 42.into();
-    /// let raw = user_id.value(); // ⚠️ Breaks type safety!
-    /// ```
-    /// 
-    /// # Example (Preferred)
-    /// ```rust,no_run
-    /// # use tagged_core::Tagged;
-    /// # struct UserIdTag;
-    /// # type UserId = Tagged<u32, UserIdTag>;
-    /// let user_id: UserId = 42.into();
-    /// let raw: u32 = *user_id; // ✓ Maintains type safety through deref access
-    /// ```
-    #[deprecated(
-        since = "0.8.0",
-        note = "Using .value() breaks type safety. Prefer Deref coercion (&*tagged) instead."
-    )]
-    pub fn value(&self) -> &T {
-        &self.value
-    }
 }
 
 
@@ -322,6 +290,19 @@ where
     }
 }
 
+    /// ⚠️ **WARNING**: Avoid extracting the inner value ( deref coercion, or `*`) as it weakens type safety.
+    ///
+    /// Pulling out `T` defeats the purpose of `Tagged<T, Tag>` and makes it easier to mix
+    /// semantically different values that share the same underlying type.
+    /// Prefer keeping values wrapped as `Tagged` throughout your codebase
+    /// # Example
+    /// ```rust,no_run
+    /// # use tagged_core::Tagged;
+    /// # struct UserIdTag;
+    /// # type UserId = Tagged<u32, UserIdTag>;
+    /// let user_id: UserId = 42.into();
+    /// let raw: u32 = *user_id; // ⚠️  Breaks type safety!
+    /// ```
 impl<T, Tag> Deref for Tagged<T, Tag> {
     type Target = T;
 
